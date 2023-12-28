@@ -16,9 +16,9 @@ public class RegistrationSystem {
 		User user = new User();
 		user.setFirstName("Jose");
 		user.setLastName("Camino");
-		user.setEmail("test@gmail.com");
+		user.setEmail("test8@gmail.com");
 		user.setPassword("test1234");
-		user.setUsername("scaminom");
+		user.setUsername("scaminom8");
 		user.setRole(User.Role.ADMIN);
 		UserDao userdao = new UserDao();
 		userdao.saveUser(user);
