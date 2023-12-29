@@ -55,6 +55,10 @@ public class UserDao {
 	}
 
 	public void updateUser(User user) {
+		if (user.getId() == null) {
+			throw new IllegalArgumentException("User must have an ID to be updated.");
+		}
+
 		Session session = null;
 		Transaction transaction = null;
 		try {
@@ -68,6 +72,7 @@ public class UserDao {
 			if (transaction != null) {
 				transaction.rollback();
 			}
+			throw e;
 		} finally {
 			if (session != null) {
 				session.close();
