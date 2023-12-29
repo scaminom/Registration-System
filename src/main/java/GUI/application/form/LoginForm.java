@@ -1,4 +1,4 @@
-package raven.application.form;
+package GUI.application.form;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.util.UIScale;
@@ -7,7 +7,7 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Insets;
 import java.awt.LayoutManager;
-import raven.application.Application;
+import GUI.application.Application;
 
 /**
  *

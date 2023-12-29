@@ -1,5 +1,7 @@
-package raven.menu;
+package GUI.menu;
 
+import GUI.menu.mode.LightDarkMode;
+import GUI.menu.mode.ToolBarAccentColor;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.ui.FlatUIUtils;
 import com.formdev.flatlaf.util.UIScale;
@@ -15,19 +17,14 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
-import raven.menu.mode.LightDarkMode;
-import raven.menu.mode.ToolBarAccentColor;
 
 public class Menu extends JPanel {
 
 	private final String menuItems[][] = {
 		{"~MAIN~"},
 		{"Dashboard"},
-		{"~WEB APP~"},
-		{"Empleado", "Administrar", "Read", "Compost"},
-		{"Chat"},
-		{"Calendar"},
-		{"~COMPONENT~"},
+		{"~REGISTRO DE EMPLEADOS~"},
+		{"Empleado", "Administrar"},
 		{"Logout"}
 	};
 
@@ -55,7 +52,7 @@ public class Menu extends JPanel {
 
 	private final List<MenuEvent> events = new ArrayList<>();
 	private boolean menuFull = true;
-	private final String headerName = "Raven Channel";
+	private final String headerName = "Scrum Team";
 
 	protected final boolean hideMenuTitleOnMinimum = true;
 	protected final int menuTitleLeftInset = 5;
@@ -75,7 +72,7 @@ public class Menu extends JPanel {
 				+ "background:$Menu.background;"
 				+ "arc:10");
 		header = new JLabel(headerName);
-		header.setIcon(new ImageIcon(getClass().getResource("/raven/icon/png/logo.png")));
+		header.setIcon(new ImageIcon(getClass().getResource("/GUI/icon/png/logo.png")));
 		header.putClientProperty(FlatClientProperties.STYLE, ""
 				+ "font:$Menu.header.font;"
 				+ "foreground:$Menu.foreground");

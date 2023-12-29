@@ -1,4 +1,4 @@
-package raven.application.form.other;
+package GUI.application.form.other;
 
 import com.formdev.flatlaf.FlatClientProperties;
 

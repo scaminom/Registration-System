@@ -1,4 +1,4 @@
-package raven.menu;
+package GUI.menu;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
@@ -22,10 +22,6 @@ import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
-/**
- *
- * @author Raven
- */
 public class MenuItem extends JPanel {
 
 	public boolean isMenuShow() {
@@ -77,7 +73,7 @@ public class MenuItem extends JPanel {
 	private Icon getIcon() {
 		Color lightColor = FlatUIUtils.getUIColor("Menu.icon.lightColor", Color.red);
 		Color darkColor = FlatUIUtils.getUIColor("Menu.icon.darkColor", Color.red);
-		FlatSVGIcon icon = new FlatSVGIcon("raven/menu/icon/" + menuIndex + ".svg");
+		FlatSVGIcon icon = new FlatSVGIcon("GUI/menu/icon/" + menuIndex + ".svg");
 		FlatSVGIcon.ColorFilter f = new FlatSVGIcon.ColorFilter();
 		f.add(Color.decode("#969696"), lightColor, darkColor);
 		icon.setColorFilter(f);
