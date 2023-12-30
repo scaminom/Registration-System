@@ -20,6 +20,7 @@ import javax.swing.JButton;
 import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
+import GUI.application.form.other.FormFines;
 
 public class MainForm extends JLayeredPane {
 
@@ -70,7 +71,11 @@ public class MainForm extends JLayeredPane {
 				if (subIndex == 1) {
 					Application.showForm(new FormManage());
 				}
-			} else if (index == 2) {
+                        
+			} else if(index == 2){
+                                Application.showForm(new FormFines());
+                        }
+                        else if (index == 3) {
 				Application.logout();
 			} else {
 				action.cancel();
