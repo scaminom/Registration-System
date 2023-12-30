@@ -1,5 +1,8 @@
 package GUI.application.form.other;
 
+import GUI.application.exceptionHandler.ExceptionHandler;
+import GUI.application.exceptionHandler.HibernateExceptionHandler;
+import GUI.application.exceptionHandler.UserValidator;
 import com.scrum.registrationsystem.dao.UserDao;
 import com.scrum.registrationsystem.entities.User;
 import javax.swing.JOptionPane;
@@ -8,11 +11,14 @@ import javax.swing.table.DefaultTableModel;
 
 public class FormManage extends javax.swing.JPanel {
 
-	private UserDao userManage;
+	private final UserDao userManage;
+	private final ExceptionHandler exceptionHandler;
+	private UserValidator validator;
 
 	private static final String[] COLUMN_NAMES = {"Id", "Nombre", "Apellido", "Usuario", "Contraseña", "Email", "Genero"};
 
 	public FormManage() {
+		exceptionHandler = new HibernateExceptionHandler();
 		initComponents();
 		userManage = new UserDao();
 		chargeDataTable();
@@ -26,6 +32,19 @@ public class FormManage extends javax.swing.JPanel {
 				populateFieldsFromTable(row);
 			}
 		});
+	}
+
+	private void chargeTable() {
+		DefaultTableModel model = new DefaultTableModel(COLUMN_NAMES, 0);
+		try {
+			var users = userManage.getUsers();
+			for (User user : users) {
+				model.addRow(new Object[]{user.getId(), user.getFirstName(), user.getLastName(), user.getUsername(), user.getPassword(), user.getEmail(), user.getGender()});
+			}
+		} catch (Exception e) {
+			exceptionHandler.handleException(e);
+		}
+		jtblEmployee.setModel(model);
 	}
 
 	private void populateFieldsFromTable(int row) {
@@ -42,78 +61,102 @@ public class FormManage extends javax.swing.JPanel {
 		}
 	}
 
-	private void chargeTable() {
-		DefaultTableModel model = new DefaultTableModel(COLUMN_NAMES, 0);
-		var users = userManage.getUsers();
-
-		for (User user : users) {
-			model.addRow(new Object[]{user.getId(), user.getFirstName(), user.getLastName(), user.getUsername(), user.getPassword(), user.getEmail(), user.getGender()});
-		}
-
-		jtblEmployee.setModel(model);
-
-	}
-
 	private void saveUser() {
-		String firstName = jtxtName.getText();
-		String lastName = jtxtSurname.getText();
-		String username = jtxtUsername.getText();
-		String password = jtxtPassword.getText();
-		String email = jtxtEmail.getText();
-		var role = User.Role.EMPLOYEE;
-		User user = null;
-		if (jrdMale.isSelected()) {
-			String male = "Hombre";
-			user = new User(firstName, lastName, username, password, role, email, male);
-		} else {
-			String male = "Mujer";
-			user = new User(firstName, lastName, username, password, role, email, male);
+		try {
+			String firstName = jtxtName.getText();
+			String lastName = jtxtSurname.getText();
+			String username = jtxtUsername.getText();
+			String password = jtxtPassword.getText();
+			String email = jtxtEmail.getText();
+			var role = User.Role.EMPLOYEE;
+			User user = null;
+			if (jrdMale.isSelected()) {
+				String male = "Hombre";
+				user = new User(firstName, lastName, username, password, role, email, male);
+			} else {
+				String male = "Mujer";
+				user = new User(firstName, lastName, username, password, role, email, male);
+			}
+			validator = new UserValidator(user);
+			var errors = validator.validate();
+			if (errors.isEmpty()) {
+				userManage.saveUser(user);
+				JOptionPane.showMessageDialog(null, "Empleado guardado exitosamente.");
+				cleanFields();
+				chargeTable();
+			} else {
+				errors.forEach((field, errorList) -> {
+					errorList.forEach(error
+							-> JOptionPane.showMessageDialog(null, error, "Error in " + field, JOptionPane.ERROR_MESSAGE));
+				});
+			}
+
+		} catch (Exception e) {
+			exceptionHandler.handleException(e);
 		}
-		userManage.saveUser(user);
-		chargeTable();
 	}
 
 	private void updateUser() {
-		int row = jtblEmployee.getSelectedRow();
-		User user = null;
-		if (row != -1) {
-			Long id = Long.valueOf(jtblEmployee.getValueAt(row, 0).toString());
-			user = new User();
-			user.setId(id);
-			user.setFirstName(jtxtName.getText());
-			user.setLastName(jtxtSurname.getText());
-			user.setUsername(jtxtUsername.getText());
-			user.setPassword(jtxtPassword.getText());
-			user.setEmail(jtxtEmail.getText());
-			user.setRole(User.Role.EMPLOYEE);
-			if (jrdMale.isSelected()) {
-				user.setGender("Hombre");
+		try {
+			int row = jtblEmployee.getSelectedRow();
+			User user = null;
+			if (row != -1) {
+				Long id = Long.valueOf(jtblEmployee.getValueAt(row, 0).toString());
+				user = new User();
+				user.setId(id);
+				user.setFirstName(jtxtName.getText());
+				user.setLastName(jtxtSurname.getText());
+				user.setUsername(jtxtUsername.getText());
+				user.setPassword(jtxtPassword.getText());
+				user.setEmail(jtxtEmail.getText());
+				user.setRole(User.Role.EMPLOYEE);
+				if (jrdMale.isSelected()) {
+					user.setGender("Hombre");
+				} else {
+					user.setGender("Mujer");
+				}
+				int response = JOptionPane.showConfirmDialog(null, "Esta seguro de actualizar el empleado con el id " + id + "?", "Eliminar Usuario", JOptionPane.YES_NO_OPTION);
+				if (response == JOptionPane.YES_OPTION) {
+					validator = new UserValidator(user);
+					var errors = validator.validate();
+					if (errors.isEmpty()) {
+						userManage.updateUser(user);
+						cleanFields();
+						chargeTable();
+						JOptionPane.showMessageDialog(null, "Empleado actualizado exitosamente.");
+					} else {
+						errors.forEach((field, errorList) -> {
+							errorList.forEach(error
+									-> JOptionPane.showMessageDialog(null, error, "Error in " + field, JOptionPane.ERROR_MESSAGE));
+						});
+					}
+				}
 			} else {
-				user.setGender("Mujer");
+				JOptionPane.showMessageDialog(null, "Por favor, selecciona un empleado.", "Error", JOptionPane.ERROR_MESSAGE);
 			}
-			int response = JOptionPane.showConfirmDialog(null, "Esta seguro de actualizar el empleado con el id " + id + "?", "Eliminar Usuario", JOptionPane.YES_NO_OPTION);
-			if (response == JOptionPane.YES_OPTION) {
-				userManage.updateUser(user);
-				chargeTable();
-				JOptionPane.showMessageDialog(null, "Empleado actualizado exitosamente.");
-			}
-		} else {
-			JOptionPane.showMessageDialog(null, "Por favor, selecciona un empleado.");
+		} catch (Exception e) {
+			exceptionHandler.handleException(e);
 		}
 	}
 
 	private void deleteUser() {
-		int row = jtblEmployee.getSelectedRow();
-		if (row != -1) {
-			Long id = Long.valueOf(jtblEmployee.getValueAt(row, 0).toString());
-			int response = JOptionPane.showConfirmDialog(null, "Esta seguro de eliminar el empleado?", "Eliminar Usuario", JOptionPane.YES_NO_OPTION);
-			if (response == JOptionPane.YES_OPTION) {
-				userManage.deleteUser(id);
-				chargeTable();
-				JOptionPane.showMessageDialog(null, "Empleado eliminado exitosamente.");
+		try {
+			int row = jtblEmployee.getSelectedRow();
+			if (row != -1) {
+				Long id = Long.valueOf(jtblEmployee.getValueAt(row, 0).toString());
+				int response = JOptionPane.showConfirmDialog(null, "Esta seguro de eliminar el empleado?", "Eliminar Usuario", JOptionPane.YES_NO_OPTION);
+				if (response == JOptionPane.YES_OPTION) {
+					userManage.deleteUser(id);
+					cleanFields();
+					chargeTable();
+					JOptionPane.showMessageDialog(null, "Empleado eliminado exitosamente.");
+				}
+			} else {
+				JOptionPane.showMessageDialog(null, "Por favor, selecciona un empleado.", "Error", JOptionPane.ERROR_MESSAGE);
 			}
-		} else {
-			JOptionPane.showMessageDialog(null, "Por favor, selecciona un empleado.");
+
+		} catch (Exception e) {
+			exceptionHandler.handleException(e);
 		}
 	}
 
@@ -123,6 +166,7 @@ public class FormManage extends javax.swing.JPanel {
 		jtxtUsername.setText("");
 		jtxtPassword.setText("");
 		jtxtEmail.setText("");
+		jtblEmployee.clearSelection();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -260,6 +304,7 @@ public class FormManage extends javax.swing.JPanel {
         jPanel2.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
         jPanel2.setLayout(new javax.swing.BoxLayout(jPanel2, javax.swing.BoxLayout.LINE_AXIS));
 
+        jtblEmployee.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED, java.awt.Color.lightGray, java.awt.Color.lightGray, java.awt.Color.lightGray, java.awt.Color.lightGray));
         jtblEmployee.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
@@ -271,6 +316,8 @@ public class FormManage extends javax.swing.JPanel {
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
+        jtblEmployee.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        jtblEmployee.setShowGrid(true);
         jScrollPane1.setViewportView(jtblEmployee);
 
         jPanel2.add(jScrollPane1);

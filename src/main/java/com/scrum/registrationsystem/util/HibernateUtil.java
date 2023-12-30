@@ -1,5 +1,6 @@
 package com.scrum.registrationsystem.util;
 
+import javax.swing.JOptionPane;
 import org.hibernate.HibernateException;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
@@ -22,6 +23,10 @@ public class HibernateUtil {
 			return configuration.buildSessionFactory(serviceRegistry);
 		} catch (HibernateException ex) {
 			System.err.println("Initial SessionFactory creation failed." + ex);
+			JOptionPane.showMessageDialog(null,
+					"A ocurrido un error en la base de datos. Por favor contactese con el administrador.",
+					"Error en la base de datos",
+					JOptionPane.ERROR_MESSAGE);
 			throw new ExceptionInInitializerError(ex);
 		}
 	}
