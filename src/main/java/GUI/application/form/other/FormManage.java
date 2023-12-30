@@ -70,12 +70,13 @@ public class FormManage extends javax.swing.JPanel {
 			String email = jtxtEmail.getText();
 			var role = User.Role.EMPLOYEE;
 			User user = null;
+			double initialSalary = 800.0;
 			if (jrdMale.isSelected()) {
 				String male = "Hombre";
-				user = new User(firstName, lastName, username, password, role, email, male);
+				user = new User(firstName, lastName, username, password, role, email, male, initialSalary);
 			} else {
 				String male = "Mujer";
-				user = new User(firstName, lastName, username, password, role, email, male);
+				user = new User(firstName, lastName, username, password, role, email, male, initialSalary);
 			}
 			validator = new UserValidator(user);
 			var errors = validator.validate();
@@ -96,46 +97,91 @@ public class FormManage extends javax.swing.JPanel {
 		}
 	}
 
+	private User prepareUpdatedUser(Long id, User updatedUser) {
+		User existingUser = userManage.getUser(id);
+		if (existingUser == null) {
+			throw new IllegalArgumentException("User not found with ID: " + id);
+		}
+
+		if (updatedUser.getFirstName() != null && !updatedUser.getFirstName().equals(existingUser.getFirstName())) {
+			existingUser.setFirstName(updatedUser.getFirstName());
+		}
+		if (updatedUser.getLastName() != null && !updatedUser.getLastName().equals(existingUser.getLastName())) {
+			existingUser.setLastName(updatedUser.getLastName());
+		}
+		if (updatedUser.getUsername() != null && !updatedUser.getUsername().equals(existingUser.getUsername())) {
+			existingUser.setUsername(updatedUser.getUsername());
+		}
+		if (updatedUser.getPassword() != null && !updatedUser.getPassword().equals(existingUser.getPassword())) {
+			existingUser.setPassword(updatedUser.getPassword());
+		}
+		if (updatedUser.getRole() != null && !updatedUser.getRole().equals(existingUser.getRole())) {
+			existingUser.setRole(updatedUser.getRole());
+		}
+		if (updatedUser.getEmail() != null && !updatedUser.getEmail().equals(existingUser.getEmail())) {
+			existingUser.setEmail(updatedUser.getEmail());
+		}
+		if (updatedUser.getGender() != null && !updatedUser.getGender().equals(existingUser.getGender())) {
+			existingUser.setGender(updatedUser.getGender());
+		}
+
+		if (updatedUser.getFingerprintPattern() != null && !updatedUser.getFingerprintPattern().equals(existingUser.getFingerprintPattern())) {
+			existingUser.setFingerprintPattern(updatedUser.getFingerprintPattern());
+		}
+
+		return existingUser;
+	}
+
+	private User getUpdatedUserFromForm() {
+		User updatedUser = new User();
+
+		updatedUser.setFirstName(jtxtName.getText());
+		updatedUser.setLastName(jtxtSurname.getText());
+		updatedUser.setUsername(jtxtUsername.getText());
+		updatedUser.setPassword(jtxtPassword.getText());
+		updatedUser.setEmail(jtxtEmail.getText());
+
+		updatedUser.setRole(User.Role.EMPLOYEE);
+
+		updatedUser.setGender(jrdMale.isSelected() ? "Male" : "Female");
+		return updatedUser;
+	}
+
 	private void updateUser() {
 		try {
 			int row = jtblEmployee.getSelectedRow();
-			User user = null;
 			if (row != -1) {
 				Long id = Long.valueOf(jtblEmployee.getValueAt(row, 0).toString());
-				user = new User();
-				user.setId(id);
-				user.setFirstName(jtxtName.getText());
-				user.setLastName(jtxtSurname.getText());
-				user.setUsername(jtxtUsername.getText());
-				user.setPassword(jtxtPassword.getText());
-				user.setEmail(jtxtEmail.getText());
-				user.setRole(User.Role.EMPLOYEE);
-				if (jrdMale.isSelected()) {
-					user.setGender("Hombre");
-				} else {
-					user.setGender("Mujer");
-				}
-				int response = JOptionPane.showConfirmDialog(null, "Esta seguro de actualizar el empleado con el id " + id + "?", "Eliminar Usuario", JOptionPane.YES_NO_OPTION);
+				User updatedUser = getUpdatedUserFromForm();
+				User user = prepareUpdatedUser(id, updatedUser);
+
+				int response = JOptionPane.showConfirmDialog(null, "Are you sure you want to update the user with ID " + id + "?", "Update User", JOptionPane.YES_NO_OPTION);
 				if (response == JOptionPane.YES_OPTION) {
-					validator = new UserValidator(user);
-					var errors = validator.validate();
-					if (errors.isEmpty()) {
-						userManage.updateUser(user);
-						cleanFields();
-						chargeTable();
-						JOptionPane.showMessageDialog(null, "Empleado actualizado exitosamente.");
-					} else {
-						errors.forEach((field, errorList) -> {
-							errorList.forEach(error
-									-> JOptionPane.showMessageDialog(null, error, "Error in " + field, JOptionPane.ERROR_MESSAGE));
-						});
-					}
+					performUpdate(user);
 				}
 			} else {
-				JOptionPane.showMessageDialog(null, "Por favor, selecciona un empleado.", "Error", JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(null, "Please select a user.", "Error", JOptionPane.ERROR_MESSAGE);
 			}
 		} catch (Exception e) {
 			exceptionHandler.handleException(e);
+		}
+	}
+
+	private void performUpdate(User user) {
+		if (user != null) {
+			UserValidator validator = new UserValidator(user);
+			var errors = validator.validate();
+
+			if (errors.isEmpty()) {
+				userManage.updateUser(user);
+				cleanFields();
+				chargeTable();
+				JOptionPane.showMessageDialog(null, "User updated successfully.", "Update", JOptionPane.INFORMATION_MESSAGE);
+			} else {
+				errors.forEach((field, errorList) -> {
+					errorList.forEach(error -> JOptionPane.showMessageDialog(null, error, "Error in " + field, JOptionPane.ERROR_MESSAGE));
+				});
+			}
 		}
 	}
 
