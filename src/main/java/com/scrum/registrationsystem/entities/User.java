@@ -1,14 +1,19 @@
 package com.scrum.registrationsystem.entities;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -49,10 +54,15 @@ public class User implements Serializable {
 	@Column(name = "fingerprint_pattern")
 	private String fingerprintPattern;
 
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	private List<Register> registrations;
+
 	public User() {
+		registrations = new ArrayList<>();
 	}
 
 	public User(String firstName, String lastName, String username, String password, Role role, String email, String gender, double salaryRecived) {
+		registrations = new ArrayList<>();
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.username = username;
@@ -150,6 +160,19 @@ public class User implements Serializable {
 
 	public void setFingerprintPattern(String fingerprintPattern) {
 		this.fingerprintPattern = fingerprintPattern;
+	}
+
+	public List<Register> getRegistrations() {
+		return registrations;
+	}
+
+	public void setRegistrations(List<Register> registrations) {
+		this.registrations = registrations;
+	}
+
+	public void addRegistration(Register registration) {
+		registrations.add(registration);
+		registration.setUser(this);
 	}
 
 	public enum Role {
