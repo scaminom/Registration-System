@@ -40,18 +40,29 @@ public class User implements Serializable {
     @Column(name = "gender")
     private String gender;
 
-    public User() {
-    }
+	@Column(name = "base_salary")
+	private double baseSalary;
 
-    public User(String firstName, String lastName, String username, String password, Role role, String email, String gender) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.username = username;
-        this.password = password;
-        this.role = role;
-        this.email = email;
-        this.gender = gender;
-    }
+	@Column(name = "salary_received")
+	private double salaryRecived;
+
+	@Column(name = "fingerprint_pattern")
+	private String fingerprintPattern;
+
+	public User() {
+	}
+
+	public User(String firstName, String lastName, String username, String password, Role role, String email, String gender, double salaryRecived) {
+		this.firstName = firstName;
+		this.lastName = lastName;
+		this.username = username;
+		this.password = password;
+		this.role = role;
+		this.email = email;
+		this.gender = gender;
+		this.baseSalary = 800.0;
+		this.salaryRecived = salaryRecived;
+	}
 
     public Long getId() {
         return id;
@@ -117,12 +128,31 @@ public class User implements Serializable {
         this.gender = gender;
     }
 
-    public enum Role {
-        ADMIN, EMPLOYEE
-    }
+	public double getBaseSalary() {
+		return baseSalary;
+	}
 
-    @Override
-    public String toString() {
-        return getFirstName() + " " + getLastName();
-    }
+	public void setBaseSalary(double baseSalary) {
+		this.baseSalary = baseSalary;
+	}
+
+	public double getSalaryRecived() {
+		return salaryRecived;
+	}
+
+	public void setSalaryRecived(double salaryRecived) {
+		this.salaryRecived = salaryRecived;
+	}
+
+	public String getFingerprintPattern() {
+		return fingerprintPattern;
+	}
+
+	public void setFingerprintPattern(String fingerprintPattern) {
+		this.fingerprintPattern = fingerprintPattern;
+	}
+
+	public enum Role {
+		ADMIN, EMPLOYEE
+	}
 }
