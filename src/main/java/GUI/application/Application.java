@@ -14,47 +14,47 @@ import javax.swing.UIManager;
 
 public class Application extends javax.swing.JFrame {
 
-	private static Application app;
-	private final MainForm mainForm;
-	private final LoginForm loginForm;
+    private static Application app;
+    private final MainForm mainForm;
+    private final LoginForm loginForm;
 
-	public Application() {
-		initComponents();
-		setSize(new Dimension(1366, 768));
-		setLocationRelativeTo(null);
-		mainForm = new MainForm();
-		loginForm = new LoginForm();
-		setContentPane(loginForm);
-	}
+    public Application() {
+        initComponents();
+        setSize(new Dimension(1366, 768));
+        setLocationRelativeTo(null);
+        mainForm = new MainForm();
+        loginForm = new LoginForm();
+        setContentPane(loginForm);
+    }
 
-	public static void showForm(Component component) {
-		component.applyComponentOrientation(app.getComponentOrientation());
-		app.mainForm.showForm(component);
-	}
+    public static void showForm(Component component) {
+        component.applyComponentOrientation(app.getComponentOrientation());
+        app.mainForm.showForm(component);
+    }
 
-	public static void login() {
-		FlatAnimatedLafChange.showSnapshot();
-		app.setContentPane(app.mainForm);
-		app.mainForm.applyComponentOrientation(app.getComponentOrientation());
-		setSelectedMenu(0, 0);
-		app.mainForm.hideMenu();
-		SwingUtilities.updateComponentTreeUI(app.mainForm);
-		FlatAnimatedLafChange.hideSnapshotWithAnimation();
-	}
+    public static void login() {
+        FlatAnimatedLafChange.showSnapshot();
+        app.setContentPane(app.mainForm);
+        app.mainForm.applyComponentOrientation(app.getComponentOrientation());
+        setSelectedMenu(0, 0);
+        app.mainForm.hideMenu();
+        SwingUtilities.updateComponentTreeUI(app.mainForm);
+        FlatAnimatedLafChange.hideSnapshotWithAnimation();
+    }
 
-	public static void logout() {
-		FlatAnimatedLafChange.showSnapshot();
-		app.setContentPane(app.loginForm);
-		app.loginForm.applyComponentOrientation(app.getComponentOrientation());
-		SwingUtilities.updateComponentTreeUI(app.loginForm);
-		FlatAnimatedLafChange.hideSnapshotWithAnimation();
-	}
+    public static void logout() {
+        FlatAnimatedLafChange.showSnapshot();
+        app.setContentPane(app.loginForm);
+        app.loginForm.applyComponentOrientation(app.getComponentOrientation());
+        SwingUtilities.updateComponentTreeUI(app.loginForm);
+        FlatAnimatedLafChange.hideSnapshotWithAnimation();
+    }
 
-	public static void setSelectedMenu(int index, int subIndex) {
-		app.mainForm.setSelectedMenu(index, subIndex);
-	}
+    public static void setSelectedMenu(int index, int subIndex) {
+        app.mainForm.setSelectedMenu(index, subIndex);
+    }
 
-	@SuppressWarnings("unchecked")
+    @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
@@ -75,17 +75,18 @@ public class Application extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-	public static void main(String args[]) {
-		FlatRobotoFont.install();
-		FlatLaf.registerCustomDefaultsSource("GUI.theme");
-		UIManager.put("defaultFont", new Font(FlatRobotoFont.FAMILY, Font.PLAIN, 13));
-		FlatMacDarkLaf.setup();
-		java.awt.EventQueue.invokeLater(() -> {
-			app = new Application();
-			// app.applyComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
-			app.setVisible(true);
-		});
-	}
+    public static void main(String args[]) {
+        System.getProperty("java.classpath");
+        FlatRobotoFont.install();
+        FlatLaf.registerCustomDefaultsSource("GUI.theme");
+        UIManager.put("defaultFont", new Font(FlatRobotoFont.FAMILY, Font.PLAIN, 13));
+        FlatMacDarkLaf.setup();
+        java.awt.EventQueue.invokeLater(() -> {
+            app = new Application();
+            // app.applyComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+            app.setVisible(true);
+        });
+    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     // End of variables declaration//GEN-END:variables
