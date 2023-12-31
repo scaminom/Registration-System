@@ -36,6 +36,9 @@ public class LoginForm extends javax.swing.JPanel {
         cmdLogin.putClientProperty(FlatClientProperties.STYLE, ""
                 + "borderWidth:0;"
                 + "focusWidth:0");
+        jbtnRegistrarAsistencia.putClientProperty(FlatClientProperties.STYLE, ""
+                + "borderWidth:0;"
+                + "focusWidth:0");
         txtUser.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "User Name");
         txtPass.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Password");
     }
@@ -51,6 +54,7 @@ public class LoginForm extends javax.swing.JPanel {
         txtUser = new javax.swing.JTextField();
         lbPass = new javax.swing.JLabel();
         txtPass = new javax.swing.JPasswordField();
+        jbtnRegistrarAsistencia = new javax.swing.JButton();
 
         cmdLogin.setText("Login");
         cmdLogin.addActionListener(new java.awt.event.ActionListener() {
@@ -65,6 +69,13 @@ public class LoginForm extends javax.swing.JPanel {
         lbUser.setText("User Name");
 
         lbPass.setText("Password");
+
+        jbtnRegistrarAsistencia.setText("Registrar asistencia");
+        jbtnRegistrarAsistencia.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jbtnRegistrarAsistenciaActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout loginLayout = new javax.swing.GroupLayout(login);
         login.setLayout(loginLayout);
@@ -88,13 +99,11 @@ public class LoginForm extends javax.swing.JPanel {
                             .addGroup(loginLayout.createSequentialGroup()
                                 .addGroup(loginLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(lbPass)
-                                    .addComponent(txtPass, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addComponent(txtPass, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(cmdLogin)
+                                    .addComponent(jbtnRegistrarAsistencia))
                                 .addGap(0, 0, Short.MAX_VALUE)))))
                 .addContainerGap())
-            .addGroup(loginLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(cmdLogin)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         loginLayout.setVerticalGroup(
             loginLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -109,8 +118,10 @@ public class LoginForm extends javax.swing.JPanel {
                 .addComponent(lbPass)
                 .addGap(5, 5, 5)
                 .addComponent(txtPass, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(50, 50, 50)
+                .addGap(18, 18, 18)
                 .addComponent(cmdLogin)
+                .addGap(9, 9, 9)
+                .addComponent(jbtnRegistrarAsistencia)
                 .addContainerGap())
         );
 
@@ -135,6 +146,10 @@ public class LoginForm extends javax.swing.JPanel {
     private void cmdLoginActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdLoginActionPerformed
         Application.login();
     }//GEN-LAST:event_cmdLoginActionPerformed
+
+    private void jbtnRegistrarAsistenciaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbtnRegistrarAsistenciaActionPerformed
+        Application.attendanceRecorder();
+    }//GEN-LAST:event_jbtnRegistrarAsistenciaActionPerformed
 
     private class LoginFormLayout implements LayoutManager {
 
@@ -207,6 +222,7 @@ public class LoginForm extends javax.swing.JPanel {
                 height += txtPass.getPreferredSize().height;
                 height += UIScale.scale(buttonGap);
                 height += cmdLogin.getPreferredSize().height;
+                height += jbtnRegistrarAsistencia.getPreferredSize().height;
                 return new Dimension(0, height);
             }
         }
@@ -240,12 +256,14 @@ public class LoginForm extends javax.swing.JPanel {
                 y += txtPass.getPreferredSize().height + UIScale.scale(buttonGap);
 
                 cmdLogin.setBounds(x, y, width, cmdLogin.getPreferredSize().height);
+                jbtnRegistrarAsistencia.setBounds(x, y, width, cmdLogin.getPreferredSize().height);
             }
         }
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cmdLogin;
+    private javax.swing.JButton jbtnRegistrarAsistencia;
     private javax.swing.JLabel lbPass;
     private javax.swing.JLabel lbTitle;
     private javax.swing.JLabel lbUser;

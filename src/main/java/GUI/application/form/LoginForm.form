@@ -62,6 +62,8 @@
                                   <Group type="103" groupAlignment="0" attributes="0">
                                       <Component id="lbPass" min="-2" max="-2" attributes="0"/>
                                       <Component id="txtPass" min="-2" pref="100" max="-2" attributes="0"/>
+                                      <Component id="cmdLogin" alignment="0" min="-2" max="-2" attributes="0"/>
+                                      <Component id="jbtnRegistrarAsistencia" alignment="0" min="-2" max="-2" attributes="0"/>
                                   </Group>
                                   <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                               </Group>
@@ -69,11 +71,6 @@
                       </Group>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
-              </Group>
-              <Group type="102" alignment="0" attributes="0">
-                  <EmptySpace max="-2" attributes="0"/>
-                  <Component id="cmdLogin" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace max="32767" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -90,8 +87,10 @@
                   <Component id="lbPass" min="-2" max="-2" attributes="0"/>
                   <EmptySpace min="-2" pref="5" max="-2" attributes="0"/>
                   <Component id="txtPass" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace min="-2" pref="50" max="-2" attributes="0"/>
+                  <EmptySpace type="separate" max="-2" attributes="0"/>
                   <Component id="cmdLogin" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace min="-2" pref="9" max="-2" attributes="0"/>
+                  <Component id="jbtnRegistrarAsistencia" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
           </Group>
@@ -125,6 +124,14 @@
           </Properties>
         </Component>
         <Component class="javax.swing.JPasswordField" name="txtPass">
+        </Component>
+        <Component class="javax.swing.JButton" name="jbtnRegistrarAsistencia">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Registrar asistencia"/>
+          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jbtnRegistrarAsistenciaActionPerformed"/>
+          </Events>
         </Component>
       </SubComponents>
     </Container>

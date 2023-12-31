@@ -1,5 +1,6 @@
 package com.scrum.registrationsystem.entities;
 
+import jakarta.persistence.Basic;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -9,6 +10,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.io.Serializable;
@@ -19,40 +21,42 @@ import java.util.List;
 @Table(name = "users")
 public class User implements Serializable {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-	@Column(name = "first_name", nullable = false)
-	private String firstName;
+    @Column(name = "first_name", nullable = false)
+    private String firstName;
 
-	@Column(name = "last_name", nullable = false)
-	private String lastName;
+    @Column(name = "last_name", nullable = false)
+    private String lastName;
 
-	@Column(name = "username", nullable = false, unique = true)
-	private String username;
+    @Column(name = "username", nullable = false, unique = true)
+    private String username;
 
-	@Column(name = "password", nullable = false)
-	private String password;
+    @Column(name = "password", nullable = false)
+    private String password;
 
-	@Enumerated(EnumType.STRING)
-	@Column(name = "role", nullable = false)
-	private Role role;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false)
+    private Role role;
 
-	@Column(name = "email", nullable = false, unique = true)
-	private String email;
+    @Column(name = "email", nullable = false, unique = true)
+    private String email;
 
-	@Column(name = "gender")
-	private String gender;
+    @Column(name = "gender")
+    private String gender;
 
-	@Column(name = "base_salary")
-	private double baseSalary;
+    @Column(name = "base_salary")
+    private double baseSalary;
 
-	@Column(name = "salary_received")
-	private double salaryRecived;
+    @Column(name = "salary_received")
+    private double salaryRecived;
 
-	@Column(name = "fingerprint_pattern")
-	private String fingerprintPattern;
+    @Lob
+    @Basic
+    @Column(name = "fingerprint_pattern")
+    private byte[] fingerprintPattern;
 
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	private List<Register> registrations;
@@ -79,94 +83,102 @@ public class User implements Serializable {
 		this.salaryRecived = salaryRecived;
 	}
 
-	public Long getId() {
-		return id;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public String getFirstName() {
-		return firstName;
-	}
+    public String getFirstName() {
+        return firstName;
+    }
 
-	public void setFirstName(String firstName) {
-		this.firstName = firstName;
-	}
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
 
-	public String getLastName() {
-		return lastName;
-	}
+    public String getLastName() {
+        return lastName;
+    }
 
-	public void setLastName(String lastName) {
-		this.lastName = lastName;
-	}
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
 
-	public String getUsername() {
-		return username;
-	}
+    public String getUsername() {
+        return username;
+    }
 
-	public void setUsername(String username) {
-		this.username = username;
-	}
+    public void setUsername(String username) {
+        this.username = username;
+    }
 
-	public String getPassword() {
-		return password;
-	}
+    public String getPassword() {
+        return password;
+    }
 
-	public void setPassword(String password) {
-		this.password = password;
-	}
+    public void setPassword(String password) {
+        this.password = password;
+    }
 
-	public Role getRole() {
-		return role;
-	}
+    public Role getRole() {
+        return role;
+    }
 
-	public void setRole(Role role) {
-		this.role = role;
-	}
+    public void setRole(Role role) {
+        this.role = role;
+    }
 
-	public String getEmail() {
-		return email;
-	}
+    public String getEmail() {
+        return email;
+    }
 
-	public void setEmail(String email) {
-		this.email = email;
-	}
+    public void setEmail(String email) {
+        this.email = email;
+    }
 
-	public String getGender() {
-		return gender;
-	}
+    public String getGender() {
+        return gender;
+    }
 
-	public void setGender(String gender) {
-		this.gender = gender;
-	}
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
 
-	public double getBaseSalary() {
-		return baseSalary;
-	}
+    public double getBaseSalary() {
+        return baseSalary;
+    }
 
-	public void setBaseSalary(double baseSalary) {
-		this.baseSalary = baseSalary;
-	}
+    public void setBaseSalary(double baseSalary) {
+        this.baseSalary = baseSalary;
+    }
 
-	public double getSalaryRecived() {
-		return salaryRecived;
-	}
+    public double getSalaryRecived() {
+        return salaryRecived;
+    }
 
-	public void setSalaryRecived(double salaryRecived) {
-		this.salaryRecived = salaryRecived;
-	}
+    public void setSalaryRecived(double salaryRecived) {
+        this.salaryRecived = salaryRecived;
+    }
 
-	public String getFingerprintPattern() {
-		return fingerprintPattern;
-	}
+    public byte[] getFingerprintPattern() {
+        return fingerprintPattern;
+    }
 
-	public void setFingerprintPattern(String fingerprintPattern) {
-		this.fingerprintPattern = fingerprintPattern;
-	}
+    public void setFingerprintPattern(byte[] fingerprintPattern) {
+        this.fingerprintPattern = fingerprintPattern;
+    }
 
+    public enum Role {
+        ADMIN, EMPLOYEE
+    }
+    
+    @Override
+    public String toString() {
+        return getFirstName() + " " + getLastName();
+    }
 	public List<Register> getRegistrations() {
 		return registrations;
 	}
@@ -193,7 +205,4 @@ public class User implements Serializable {
 		registration.setUser(this);
 	}
 
-	public enum Role {
-		ADMIN, EMPLOYEE
-	}
 }

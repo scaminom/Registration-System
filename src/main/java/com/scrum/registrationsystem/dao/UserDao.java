@@ -87,6 +87,33 @@ public class UserDao extends Repository<User> {
 			return false;
 		}
 	}
+        
+        public boolean updateUserFingerprint(User user, byte[] fingerprintData) {
+		if (user == null || user.getId() == null) {
+			throw new IllegalArgumentException("User and its ID must not be null for update.");
+		}
+	
+		Session session = null;
+		Transaction transaction = null;
+		try {
+			session = HibernateUtil.getSessionFactory().openSession();
+			transaction = session.beginTransaction();
+			user.setFingerprintPattern(fingerprintData);
+			session.update(user);
+			transaction.commit();
+			return true;
+		} catch (Exception e) {
+			if (transaction != null) {
+				try {
+					transaction.rollback();
+				} catch (RuntimeException re) {
+					logger.error("Rollback error: ", re);
+				}
+			}
+			logger.error("Hibernate error: ", e);
+			return false;
+		}
+	}
 
 	@Override
 	public boolean delete(Long id) {
