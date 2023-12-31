@@ -3,8 +3,11 @@ package GUI.application.form;
 import GUI.application.Application;
 import GUI.application.form.other.FormDashboard;
 import GUI.application.form.other.FormFingerprint;
+import GUI.application.form.other.FormFines;
 import GUI.application.form.other.FormManage;
 import GUI.application.form.other.FormRegister;
+import GUI.application.form.other.FormRegistrationsReports;
+import GUI.application.form.other.FormRegistrationsSalary;
 import GUI.menu.Menu;
 import GUI.menu.MenuAction;
 import com.formdev.flatlaf.FlatClientProperties;
@@ -22,7 +25,6 @@ import javax.swing.JButton;
 import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
-import GUI.application.form.other.FormFines;
 
 public class MainForm extends JLayeredPane {
 
@@ -76,9 +78,13 @@ public class MainForm extends JLayeredPane {
                     Application.showForm(new FormFingerprint());
                 }
             } else if (index == 2) {
-                Application.showForm(new FormRegister());
-            } else if (index == 3) {
                 Application.showForm(new FormFines());
+            } else if (index == 3) {
+                if (subIndex == 1) {
+                    Application.showForm(new FormRegistrationsReports());
+                } else if (subIndex == 2) {
+                    Application.showForm(new FormRegistrationsSalary());
+                }
             } else if (index == 4) {
                 Application.logout();
             } else {

@@ -167,6 +167,7 @@ public class FormManage extends javax.swing.JPanel {
         jbtnEdit = new javax.swing.JButton();
         jbtnDelete = new javax.swing.JButton();
         jbtnClean = new javax.swing.JButton();
+        jbtnReport = new javax.swing.JButton();
 
         jPanel1.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
 
@@ -356,6 +357,14 @@ public class FormManage extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(17, 130, 57, 126);
         jPanel3.add(jbtnClean, gridBagConstraints);
 
+        jbtnReport.setText("Generar Reporte");
+        jbtnReport.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jbtnReportActionPerformed(evt);
+            }
+        });
+        jPanel3.add(jbtnReport, new java.awt.GridBagConstraints());
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -397,6 +406,9 @@ public class FormManage extends javax.swing.JPanel {
 		loadDataToFields();
     }//GEN-LAST:event_jtblEmployeeMouseClicked
 
+    private void jbtnReportActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbtnReportActionPerformed
+    }//GEN-LAST:event_jbtnReportActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
@@ -406,6 +418,7 @@ public class FormManage extends javax.swing.JPanel {
     private javax.swing.JButton jbtnClean;
     private javax.swing.JButton jbtnDelete;
     private javax.swing.JButton jbtnEdit;
+    private javax.swing.JButton jbtnReport;
     private javax.swing.JButton jbtnSave;
     private javax.swing.JLabel jlbEmail;
     private javax.swing.JLabel jlbGender;

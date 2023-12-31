@@ -25,8 +25,8 @@ public class Menu extends JPanel {
 			{ "Dashboard" },
 			{ "~REGISTRO DE EMPLEADOS~" },
 			{ "Empleado", "Administrar", "Añadir huella" },
-			{ "Registro" },
 			{ "Multas" },
+			{ "Reportes", "Registros", "Sueldos" },
 			{ "Logout" }
 	};
 

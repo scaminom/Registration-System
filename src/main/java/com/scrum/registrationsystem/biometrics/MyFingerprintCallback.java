@@ -70,18 +70,20 @@ public class MyFingerprintCallback implements FingerprintCallback {
 
         try {
             Register register = registerDao.findLastRecordByUser(user.getId());
-            if (register == null) {
+            if (register == null || (register.getEntryTime() != null && register.getExitTime() != null)) {
                 LocalDateTime entryTime = LocalDateTime.now();
                 Register newRegister = new Register(entryTime, null, user);
                 user.addRegistration(newRegister);
                 registerManage.saveRegister(newRegister);
-                JOptionPane.showMessageDialog(null, user.getFirstName() + " " + user.getLastName() + " entrada registrada correctamente.");
+                JOptionPane.showMessageDialog(null,
+                        user.getFirstName() + " " + user.getLastName() + " entrada registrada correctamente.");
             } else if (register.getEntryTime() != null && register.getExitTime() == null) {
                 LocalDateTime exitTime = LocalDateTime.now();
                 user.addRegistration(register);
                 register.setExitTime(exitTime);
                 registerManage.updateRegister(register);
-                JOptionPane.showMessageDialog(null, user.getFirstName() + " " + user.getLastName() + " salida registrada correctamente.");
+                JOptionPane.showMessageDialog(null,
+                        user.getFirstName() + " " + user.getLastName() + " salida registrada correctamente.");
             }
         } catch (Exception e) {
             exceptionHandler.handleException(e);
