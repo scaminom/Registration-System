@@ -15,6 +15,7 @@ import java.time.LocalTime;
 public class RegistrationSystem {
 
 	public static void main(String[] args) {
+<<<<<<< HEAD
 		User user = new User();
 		user.setFirstName("Adrian");
 		user.setLastName("Jurado");
@@ -39,5 +40,35 @@ public class RegistrationSystem {
 
                 // Procesar multa de salida
                 finesCalculator.procesarMultaSalida(idEmpleado, horaSalidaEmpleado);
+=======
+		// User user = new User("Julio", "Julio","Julio", "Julio", User.Role.ADMIN, "Julio", "Julio");
+//		user.setFirstName("Jose");
+//		user.setLastName("Camino");
+//		user.setEmail("test8@gmail.com");
+//		user.setPassword("test1234");
+//		user.setUsername("scaminom8");
+//		user.setRole(User.Role.ADMIN);
+//		UserDao userdao = new UserDao();
+//		userdao.saveUser(user);
+		//User user1 = userdao.getUser(1l);
+
+		// LocalDateTime entryTime = LocalDateTime.now();
+		// LocalDateTime exitTime = LocalDateTime.now();
+		// Register register = new Register();
+		// register.setEntryTime(entryTime);
+		// register.setExitTime(exitTime);
+		// register.setUser(user1);
+		// RegisterDao rd = new RegisterDao();
+		// rd.saveRegister(register);
+		// System.out.println("RegisterID= " + register.getId());
+//		System.out.println("User id= " + user.getId());
+		var userDao = new UserDao();
+		User user = userDao.getUser(4L);
+		var registrations = user.getRegistrations();
+
+		for (var registration : registrations) {
+			System.out.println(registration);
+		}
+>>>>>>> a763b064c0f233d23b8f9b88652292d51f632d45
 	}
 }

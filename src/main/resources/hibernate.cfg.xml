@@ -23,6 +23,11 @@
         <property name="c3p0.idle_test_period">3000</property>
 		<property name="hibernate.current_session_context_class">thread</property>
 		<mapping class="com.scrum.registrationsystem.entities.User"/>
+<<<<<<< HEAD
                 <mapping class="com.scrum.registrationsystem.entities.Fines"/>
+=======
+                <mapping class="com.scrum.registrationsystem.entities.Register"/>
+
+>>>>>>> a763b064c0f233d23b8f9b88652292d51f632d45
     </session-factory>
 </hibernate-configuration>
