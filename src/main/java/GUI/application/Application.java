@@ -6,6 +6,9 @@ import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.extras.FlatAnimatedLafChange;
 import com.formdev.flatlaf.fonts.roboto.FlatRobotoFont;
 import com.formdev.flatlaf.themes.FlatMacDarkLaf;
+import com.scrum.registrationsystem.biometrics.FingerprintManager;
+import com.scrum.registrationsystem.biometrics.MyFingerprintCallback;
+
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -17,6 +20,8 @@ public class Application extends javax.swing.JFrame {
     private static Application app;
     private final MainForm mainForm;
     private final LoginForm loginForm;
+    FingerprintManager fingerprintManager = null;
+    MyFingerprintCallback callback = null;
 
     public Application() {
         initComponents();
@@ -25,6 +30,9 @@ public class Application extends javax.swing.JFrame {
         mainForm = new MainForm();
         loginForm = new LoginForm();
         setContentPane(loginForm);
+        fingerprintManager = FingerprintManager.getInstance();
+        callback = MyFingerprintCallback.getInstance(null);
+        fingerprintManager.addFingerprintCallback(callback);
     }
 
     public static void showForm(Component component) {
