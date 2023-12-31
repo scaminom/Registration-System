@@ -264,7 +264,7 @@ public class FingerprintManager {
                         int[] size = new int[1];
                         size[0] = 4;
                         int nFakeStatus = 0;
-                        // GetFakeStatus
+                     
                         ret = FingerprintSensorEx.GetParameters(mhDevice, 2004, paramValue, size);
                         nFakeStatus = byteArrayToInt(paramValue);
                         System.out.println("ret = " + ret + ",nFakeStatus=" + nFakeStatus);

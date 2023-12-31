@@ -48,50 +48,6 @@ public class FormRegister extends javax.swing.JPanel implements FingerprintCallb
         fingerprintManager.identify();
 	}
 
-	private void saveRegister() {
-		try {
-			LocalDateTime entryTime = LocalDateTime.now();
-			User user = userDao.findById(1L);
-			Register register = new Register(entryTime, null, user);
-			user.addRegistration(register);
-			registerManage.saveRegister(register);
-			var fine = finesCalculator.procesarMultaEntrada(user.getId(), entryTime);
-			user.addFines(fine);
-			JOptionPane.showMessageDialog(null, "Registro guardado exitosamente.");
-		} catch (Exception e) {
-			exceptionHandler.handleException(e);
-		}
-	}
-
-	private void updateRegister() {
-		try {
-			LocalDateTime exitTime = LocalDateTime.now();
-			User user = userDao.findById(1L);
-			Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-			session.beginTransaction();
-			Query<Long> query = session.createQuery(
-					"SELECT r.id FROM Register r WHERE r.user.id = :userId ORDER BY r.id DESC",
-					Long.class
-			);
-			query.setParameter("userId", user.getId());
-			query.setMaxResults(1);
-
-            Long ultimoIdRegistro = query.uniqueResult();
-
-			Register register = registerManage.getRegister(ultimoIdRegistro);
-
-			user.addRegistration(register);
-			register.setExitTime(exitTime);
-			registerManage.updateRegister(register);
-			var fine = finesCalculator.procesarMultaSalida(user.getId(), exitTime);
-			user.addFines(fine);
-
-			JOptionPane.showMessageDialog(null, "Registro guardado exitosamente.");
-
-        } catch (Exception e) {
-            exceptionHandler.handleException(e);
-        }
-    }
 
     private void inicializarHoraLabel() {
         Timer timer = new Timer(1000, new ActionListener() {
