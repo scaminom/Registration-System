@@ -78,10 +78,8 @@ public class MainForm extends JLayeredPane {
             } else if (index == 2) {
                 Application.showForm(new FormRegister());
             } else if (index == 3) {
-                   Application.showForm(new FormRegister());
-            } else if(index == 4){
-                    Application.showForm(new FormFines());
-            } else if (index == 5) {
+                Application.showForm(new FormFines());
+            } else if (index == 4) {
                 Application.logout();
             } else {
                 action.cancel();

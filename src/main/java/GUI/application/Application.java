@@ -1,7 +1,9 @@
 package GUI.application;
 
+import GUI.application.form.Home;
 import GUI.application.form.LoginForm;
 import GUI.application.form.MainForm;
+import GUI.application.form.other.FormRegister;
 import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.extras.FlatAnimatedLafChange;
 import com.formdev.flatlaf.fonts.roboto.FlatRobotoFont;
@@ -20,6 +22,8 @@ public class Application extends javax.swing.JFrame {
     private static Application app;
     private final MainForm mainForm;
     private final LoginForm loginForm;
+    private final FormRegister formRegister;
+    private final Home home;
     FingerprintManager fingerprintManager = null;
     MyFingerprintCallback callback = null;
 
@@ -29,7 +33,9 @@ public class Application extends javax.swing.JFrame {
         setLocationRelativeTo(null);
         mainForm = new MainForm();
         loginForm = new LoginForm();
-        setContentPane(loginForm);
+        formRegister = new FormRegister();
+        home = new Home();
+        setContentPane(home);
         fingerprintManager = FingerprintManager.getInstance();
         callback = MyFingerprintCallback.getInstance(null);
         fingerprintManager.addFingerprintCallback(callback);
@@ -38,6 +44,14 @@ public class Application extends javax.swing.JFrame {
     public static void showForm(Component component) {
         component.applyComponentOrientation(app.getComponentOrientation());
         app.mainForm.showForm(component);
+    }
+
+    public static void attendanceRecorder() {
+        FlatAnimatedLafChange.showSnapshot();
+        app.setContentPane(app.formRegister);
+        app.formRegister.applyComponentOrientation(app.getComponentOrientation());
+        SwingUtilities.updateComponentTreeUI(app.formRegister);
+        FlatAnimatedLafChange.hideSnapshotWithAnimation();
     }
 
     public static void login() {
