@@ -8,7 +8,7 @@
         <property name="connection.driver_class">com.mysql.cj.jdbc.Driver</property>
         <property name="connection.url">jdbc:mysql://localhost:3306/registrations_db</property>
         <property name="connection.username">root</property>
-        <property name="connection.password"></property>
+        <property name="connection.password">root</property>
 
 		<property name="dialect">org.hibernate.dialect.MySQL8Dialect</property>
 
@@ -23,5 +23,7 @@
         <property name="c3p0.idle_test_period">3000</property>
 		<property name="hibernate.current_session_context_class">thread</property>
 		<mapping class="com.scrum.registrationsystem.entities.User"/>
+                <mapping class="com.scrum.registrationsystem.entities.Register"/>
+
     </session-factory>
 </hibernate-configuration>
