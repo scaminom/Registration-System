@@ -59,16 +59,17 @@ public class FormRegister extends javax.swing.JPanel {
 			LocalDateTime exitTime = LocalDateTime.now();
 			User user = userDao.getUser(5L);
 			Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+			session.beginTransaction();
 			Query<Long> query = session.createQuery(
-					"SELECT id FROM Register WHERE user_id = :userId ORDER BY id DESC",
+					"SELECT r.id FROM Register r WHERE r.user.id = :userId ORDER BY r.id DESC",
 					Long.class
 			);
-			query.setParameter("userId", user);
+			query.setParameter("userId", user.getId());
 			query.setMaxResults(1);
 
 			Long ultimoIdRegistro = query.uniqueResult();
 
-			Register register = registerManage.getRegister(Long);
+			Register register = registerManage.getRegister(ultimoIdRegistro);
 
 			user.addRegistration(register);
 			register.setExitTime(exitTime);
