@@ -15,30 +15,26 @@ import java.util.List;
 
 import javax.swing.JOptionPane;
 
-/**
- *
- * @author patri
- */
 public class FingerprintManager {
     private static FingerprintManager instance;
 
-    // the width of fingerprint image
+    
     int fpWidth = 0;
-    // the height of fingerprint image
+    
     int fpHeight = 0;
-    // for verify test
+   
     private byte[] lastRegTemp = new byte[2048];
-    // the length of lastRegTemp
+    
     private int cbRegTemp = 0;
-    // Register
+  
     private boolean bRegister = false;
-    // Identify
+    
     private boolean bIdentify = true;
-    // finger id
+   
     private int iFid = 1;
 
     private int nFakeFunOn = 1;
-    // must be 3
+    
     static final int enroll_cnt = 3;
 
     private byte[] imgbuf = null;
@@ -62,40 +58,35 @@ public class FingerprintManager {
 
     public void open() {
         if (0 != mhDevice) {
-            // already inited
+
             notifyFingerprintError("Primero cierre el dispositivo!");
-            System.exit(0);
             return;
         }
         int ret = FingerprintSensorErrorCode.ZKFP_ERR_OK;
-        // Initialize
+       
         cbRegTemp = 0;
         bRegister = false;
         bIdentify = false;
         iFid = 1;
         if (FingerprintSensorErrorCode.ZKFP_ERR_OK != FingerprintSensorEx.Init()) {
-            JOptionPane.showMessageDialog(null, "Inicialización fallida!");
-            System.out.println("Inicialización fallida!");
-            System.exit(0);
+
+            notifyFingerprintError("Inicialización fallida!");
             return;
         }
         ret = FingerprintSensorEx.GetDeviceCount();
         if (ret < 0) {
-            JOptionPane.showMessageDialog(null, "No se detectó el dispositivo!");
-            System.out.println("No se detectó el dispositivo!");
-            System.exit(0);
+           
+            notifyFingerprintError("No se detectó el dispositivo!");
             return;
         }
         if (0 == (mhDevice = FingerprintSensorEx.OpenDevice(0))) {
-            JOptionPane.showMessageDialog(null, "Error al abrir el dispositivo!");
-            System.out.println("Error al abrir el dispositivo!");
-            System.exit(0);
+            
+             notifyFingerprintError("Error al abrir el dispositivo!");
             return;
         }
         if (0 == (mhDB = FingerprintSensorEx.DBInit())) {
-            JOptionPane.showMessageDialog(null, "Error al inicializar la base de datos!");
-            System.out.println("Error al inicializar la base de datos!");
-            System.exit(0);
+            
+             notifyFingerprintError("Error al inicializar la base de datos!");
             return;
         }
 
@@ -395,7 +386,7 @@ public class FingerprintManager {
     }
 
     private void notifyFingerprintError(String message) {
-       this.callback.onFingerprintError(message);
+        this.callback.onFingerprintError(message);
     }
 
     public void notifyUser(User user) {
