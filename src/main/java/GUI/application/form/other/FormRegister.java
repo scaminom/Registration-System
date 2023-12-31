@@ -42,7 +42,7 @@ public class FormRegister extends javax.swing.JPanel {
 	private void saveRegister() {
 		try {
 			LocalDateTime entryTime = LocalDateTime.now();
-			User user = userDao.findById(1L);
+			User user = userDao.findById(30L);
 			Register register = new Register(entryTime, null, user);
 			user.addRegistration(register);
 			registerManage.saveRegister(register);
@@ -57,7 +57,7 @@ public class FormRegister extends javax.swing.JPanel {
 	private void updateRegister() {
 		try {
 			LocalDateTime exitTime = LocalDateTime.now();
-			User user = userDao.findById(1L);
+			User user = userDao.findById(30L);
 			Session session = HibernateUtil.getSessionFactory().getCurrentSession();
 			session.beginTransaction();
 			Query<Long> query = session.createQuery(

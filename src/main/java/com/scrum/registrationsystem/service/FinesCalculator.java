@@ -7,6 +7,7 @@ import com.scrum.registrationsystem.entities.Fines;
 import com.scrum.registrationsystem.entities.Register;
 import com.scrum.registrationsystem.entities.User;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 
 public class FinesCalculator {
@@ -34,6 +35,27 @@ public class FinesCalculator {
 				return 300 * MULTA_POR_MINUTO;
 			}
 		}
+     // Calcular la multa solo si hay un registro previo con hora de salida
+    if (esEntrada && ultimoRegistro != null && ultimoRegistro.getExitTime() != null) {
+        LocalDateTime horaSalidaUltimoRegistro = ultimoRegistro.getExitTime();
+
+        // Comprobar si la nueva entrada es posterior a la última salida
+        if (hora.isAfter(horaSalidaUltimoRegistro)) {
+            // Calcular la multa por el tiempo no registrado
+            long minutosAusencia;
+
+            // Si la última salida fue en la jornada matutina y la nueva entrada es en la vespertina
+            if (horaSalidaUltimoRegistro.getHour() < HORA_INICIO_JORNADA_VESPERTINA && hora.getHour() >= HORA_INICIO_JORNADA_VESPERTINA) {
+                // Calcular la multa desde el inicio de la jornada vespertina hasta la hora de entrada
+                minutosAusencia = ChronoUnit.MINUTES.between(LocalDateTime.of(hora.toLocalDate(), LocalTime.of(HORA_INICIO_JORNADA_VESPERTINA, 0)), hora);
+            } else {
+                // Caso general: calcular la multa por el lapso de tiempo entre la última salida y la nueva entrada
+                minutosAusencia = ChronoUnit.MINUTES.between(horaSalidaUltimoRegistro, hora);
+            }
+
+            return minutosAusencia * MULTA_POR_MINUTO;
+        }
+    }
 		if (!esEntrada && (ultimoRegistro != null && ultimoRegistro.getExitTime() == null)) {
 			if (ultimoRegistro.getEntryTime().getHour() < HORA_INICIO_JORNADA_VESPERTINA && hora.getHour() >= HORA_FIN_JORNADA_VESPERTINA) {
 				return (HORA_FIN_JORNADA_VESPERTINA - HORA_INICIO_JORNADA_VESPERTINA) * 60 * MULTA_POR_MINUTO;
@@ -62,7 +84,13 @@ public class FinesCalculator {
 			return calcularMultaBasica(hora, false);
 		}
 	}
-
+        
+            private boolean esMismaJornada(LocalDateTime horaInicio, LocalDateTime horaFin) {
+        // Determina si las dos horas están en la misma jornada
+        return (horaInicio.getHour() < HORA_FIN_JORNADA_MATUTINA && horaFin.getHour() < HORA_FIN_JORNADA_MATUTINA) ||
+               (horaInicio.getHour() >= HORA_INICIO_JORNADA_VESPERTINA && horaFin.getHour() >= HORA_INICIO_JORNADA_VESPERTINA);
+    }
+        
 	private double calcularMultaBasica(LocalDateTime hora, boolean esEntrada) {
 		int horaInicio;
 		int horaFin;

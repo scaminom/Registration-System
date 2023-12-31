@@ -104,12 +104,19 @@ public class RegisterDao {
     if (userId == null) {
         throw new IllegalArgumentException("User ID must not be null.");
     }
-    try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-        Query<Register> query = session.createQuery(
-            "FROM Register WHERE user.id = :userId ORDER BY id DESC", Register.class);
-        query.setParameter("userId", userId);
-        query.setMaxResults(1);
-        return query.uniqueResult();
+    try (Session session = HibernateUtil.getSessionFactory().getCurrentSession()) {
+			session.beginTransaction();
+			Query<Long> query = session.createQuery(
+					"SELECT r.id FROM Register r WHERE r.user.id = :userId ORDER BY r.id DESC",
+					Long.class
+			);
+			query.setParameter("userId", userId);
+			query.setMaxResults(1);
+
+			Long ultimoIdRegistro = query.uniqueResult();
+
+			Register register = this.getRegister(ultimoIdRegistro);
+        return register;
     } catch (HibernateException e) {
         throw e;
     }
