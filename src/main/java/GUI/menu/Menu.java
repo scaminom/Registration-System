@@ -21,11 +21,12 @@ import javax.swing.JScrollPane;
 public class Menu extends JPanel {
 
 	private final String menuItems[][] = {
-		{"~MAIN~"},
-		{"Dashboard"},
-		{"~REGISTRO DE EMPLEADOS~"},
-		{"Empleado", "Administrar", "Añadir huella"},
-		{"Logout"}
+			{ "~MAIN~" },
+			{ "Dashboard" },
+			{ "~REGISTRO DE EMPLEADOS~" },
+			{ "Empleado", "Administrar", "Añadir huella" },
+			{ "Registro" },
+			{ "Logout" }
 	};
 
 	public boolean isMenuFull() {
@@ -77,7 +78,7 @@ public class Menu extends JPanel {
 				+ "font:$Menu.header.font;"
 				+ "foreground:$Menu.foreground");
 
-		//  Menu
+		// Menu
 		scroll = new JScrollPane();
 		panelMenu = new JPanel(new MenuItemLayout(this));
 		panelMenu.putClientProperty(FlatClientProperties.STYLE, ""

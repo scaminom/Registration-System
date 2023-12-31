@@ -1,16 +1,21 @@
 package com.scrum.registrationsystem.entities;
 
 import jakarta.persistence.Basic;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Lob;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -53,20 +58,25 @@ public class User implements Serializable {
     @Column(name = "fingerprint_pattern")
     private byte[] fingerprintPattern;
 
-    public User() {
-    }
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	private List<Register> registrations;
 
-    public User(String firstName, String lastName, String username, String password, Role role, String email, String gender, double salaryRecived) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.username = username;
-        this.password = password;
-        this.role = role;
-        this.email = email;
-        this.gender = gender;
-        this.baseSalary = 800.0;
-        this.salaryRecived = salaryRecived;
-    }
+	public User() {
+		registrations = new ArrayList<>();
+	}
+
+	public User(String firstName, String lastName, String username, String password, Role role, String email, String gender, double salaryRecived) {
+		registrations = new ArrayList<>();
+		this.firstName = firstName;
+		this.lastName = lastName;
+		this.username = username;
+		this.password = password;
+		this.role = role;
+		this.email = email;
+		this.gender = gender;
+		this.baseSalary = 800.0;
+		this.salaryRecived = salaryRecived;
+	}
 
     public Long getId() {
         return id;
@@ -164,4 +174,17 @@ public class User implements Serializable {
     public String toString() {
         return getFirstName() + " " + getLastName();
     }
+	public List<Register> getRegistrations() {
+		return registrations;
+	}
+
+	public void setRegistrations(List<Register> registrations) {
+		this.registrations = registrations;
+	}
+
+	public void addRegistration(Register registration) {
+		registrations.add(registration);
+		registration.setUser(this);
+	}
+
 }
