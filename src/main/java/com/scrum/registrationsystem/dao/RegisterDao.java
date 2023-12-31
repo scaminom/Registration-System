@@ -7,6 +7,7 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 import java.util.List;
+import org.hibernate.query.Query;
 
 public class RegisterDao {
 
@@ -98,4 +99,19 @@ public class RegisterDao {
             }
         }
     }
+    
+    public Register getLastRegisterForUser(Long userId) throws HibernateException {
+    if (userId == null) {
+        throw new IllegalArgumentException("User ID must not be null.");
+    }
+    try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+        Query<Register> query = session.createQuery(
+            "FROM Register WHERE user.id = :userId ORDER BY id DESC", Register.class);
+        query.setParameter("userId", userId);
+        query.setMaxResults(1);
+        return query.uniqueResult();
+    } catch (HibernateException e) {
+        throw e;
+    }
+}
 }
