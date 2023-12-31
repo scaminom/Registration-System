@@ -72,10 +72,10 @@ public class FormManage extends javax.swing.JPanel {
 			User user = null;
 			if (jrdMale.isSelected()) {
 				String male = "Hombre";
-				user = new User(firstName, lastName, username, password, role, email, male);
+				user = new User(firstName, lastName, username, password, role, email, male, 800);
 			} else {
 				String male = "Mujer";
-				user = new User(firstName, lastName, username, password, role, email, male);
+				user = new User(firstName, lastName, username, password, role, email, male, 800);
 			}
 			validator = new UserValidator(user);
 			var errors = validator.validate();

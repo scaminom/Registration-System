@@ -47,7 +47,7 @@ public class User implements Serializable {
 	private double salaryRecived;
 
 	@Column(name = "fingerprint_pattern")
-	private String fingerprintPattern;
+	private byte[] fingerprintPattern;
 
 	public User() {
 	}
@@ -144,13 +144,13 @@ public class User implements Serializable {
 		this.salaryRecived = salaryRecived;
 	}
 
-	public String getFingerprintPattern() {
-		return fingerprintPattern;
-	}
+	public byte[] getFingerprintPattern() {
+        return fingerprintPattern;
+    }
 
-	public void setFingerprintPattern(String fingerprintPattern) {
-		this.fingerprintPattern = fingerprintPattern;
-	}
+    public void setFingerprintPattern(byte[] fingerprintPattern) {
+        this.fingerprintPattern = fingerprintPattern;
+    }
 
 	public enum Role {
 		ADMIN, EMPLOYEE

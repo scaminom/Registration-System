@@ -58,7 +58,33 @@ public class UserDao {
 		try {
 			session = HibernateUtil.getSessionFactory().openSession();
 			transaction = session.beginTransaction();
+			session.update(transaction);;
+			transaction.commit();
+		} catch (HibernateException e) {
+			if (transaction != null) {
+				transaction.rollback();
+			}
+			throw e;
+		} finally {
+			if (session != null) {
+				session.close();
+			}
+		}
+	}
+
+	public void updateUserFingerprint(User user, byte[] fingerprintData) throws HibernateException {
+		if (user == null || user.getId() == null) {
+			throw new IllegalArgumentException("User and its ID must not be null for update.");
+		}
+	
+		Session session = null;
+		Transaction transaction = null;
+		try {
+			session = HibernateUtil.getSessionFactory().openSession();
+			transaction = session.beginTransaction();
+			user.setFingerprintPattern(fingerprintData);
 			session.update(user);
+	
 			transaction.commit();
 		} catch (HibernateException e) {
 			if (transaction != null) {
