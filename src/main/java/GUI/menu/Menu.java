@@ -26,6 +26,7 @@ public class Menu extends JPanel {
 		{"~REGISTRO DE EMPLEADOS~"},
 		{"Empleado", "Administrar"},
                 {"Registro"},
+                {"Multas"},
 		{"Logout"}
 	};
 
