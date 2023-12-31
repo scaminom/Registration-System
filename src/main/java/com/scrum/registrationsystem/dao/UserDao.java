@@ -84,7 +84,6 @@ public class UserDao {
 			transaction = session.beginTransaction();
 			user.setFingerprintPattern(fingerprintData);
 			session.update(user);
-	
 			transaction.commit();
 		} catch (HibernateException e) {
 			if (transaction != null) {

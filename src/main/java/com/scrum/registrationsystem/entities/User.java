@@ -1,5 +1,6 @@
 package com.scrum.registrationsystem.entities;
 
+import jakarta.persistence.Basic;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -7,6 +8,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
 import java.io.Serializable;
 
@@ -40,29 +42,31 @@ public class User implements Serializable {
     @Column(name = "gender")
     private String gender;
 
-	@Column(name = "base_salary")
-	private double baseSalary;
+    @Column(name = "base_salary")
+    private double baseSalary;
 
-	@Column(name = "salary_received")
-	private double salaryRecived;
+    @Column(name = "salary_received")
+    private double salaryRecived;
 
-	@Column(name = "fingerprint_pattern")
-	private byte[] fingerprintPattern;
+    @Lob
+    @Basic
+    @Column(name = "fingerprint_pattern")
+    private byte[] fingerprintPattern;
 
-	public User() {
-	}
+    public User() {
+    }
 
-	public User(String firstName, String lastName, String username, String password, Role role, String email, String gender, double salaryRecived) {
-		this.firstName = firstName;
-		this.lastName = lastName;
-		this.username = username;
-		this.password = password;
-		this.role = role;
-		this.email = email;
-		this.gender = gender;
-		this.baseSalary = 800.0;
-		this.salaryRecived = salaryRecived;
-	}
+    public User(String firstName, String lastName, String username, String password, Role role, String email, String gender, double salaryRecived) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.username = username;
+        this.password = password;
+        this.role = role;
+        this.email = email;
+        this.gender = gender;
+        this.baseSalary = 800.0;
+        this.salaryRecived = salaryRecived;
+    }
 
     public Long getId() {
         return id;
@@ -128,23 +132,23 @@ public class User implements Serializable {
         this.gender = gender;
     }
 
-	public double getBaseSalary() {
-		return baseSalary;
-	}
+    public double getBaseSalary() {
+        return baseSalary;
+    }
 
-	public void setBaseSalary(double baseSalary) {
-		this.baseSalary = baseSalary;
-	}
+    public void setBaseSalary(double baseSalary) {
+        this.baseSalary = baseSalary;
+    }
 
-	public double getSalaryRecived() {
-		return salaryRecived;
-	}
+    public double getSalaryRecived() {
+        return salaryRecived;
+    }
 
-	public void setSalaryRecived(double salaryRecived) {
-		this.salaryRecived = salaryRecived;
-	}
+    public void setSalaryRecived(double salaryRecived) {
+        this.salaryRecived = salaryRecived;
+    }
 
-	public byte[] getFingerprintPattern() {
+    public byte[] getFingerprintPattern() {
         return fingerprintPattern;
     }
 
@@ -152,7 +156,12 @@ public class User implements Serializable {
         this.fingerprintPattern = fingerprintPattern;
     }
 
-	public enum Role {
-		ADMIN, EMPLOYEE
-	}
+    public enum Role {
+        ADMIN, EMPLOYEE
+    }
+    
+    @Override
+    public String toString() {
+        return getFirstName() + " " + getLastName();
+    }
 }
