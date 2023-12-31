@@ -16,12 +16,9 @@ public class HibernateUtil {
 			Configuration configuration = new Configuration();
 			configuration.configure();
 			configuration.addAnnotatedClass(com.scrum.registrationsystem.entities.User.class);
-<<<<<<< HEAD
                         configuration.addAnnotatedClass(com.scrum.registrationsystem.entities.Fines.class);
-=======
                         configuration.addAnnotatedClass(com.scrum.registrationsystem.entities.Register.class);
 
->>>>>>> a763b064c0f233d23b8f9b88652292d51f632d45
 
 			ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
 					.applySettings(configuration.getProperties()).build();
