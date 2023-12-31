@@ -44,7 +44,7 @@ public class FormFingerprint extends javax.swing.JPanel {
         private void chargeDataCombobox() {
                 DefaultComboBoxModel<User> model = new DefaultComboBoxModel<>();
                 try {
-                        var users = ud.getUsers();
+                        var users = ud.findAll();
                         for (User user : users) {
                                 model.addElement(user);
                         }

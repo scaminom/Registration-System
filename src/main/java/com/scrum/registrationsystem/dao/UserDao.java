@@ -72,21 +72,23 @@ public class UserDao extends Repository<User> {
 		Transaction transaction = null;
 		try (Session session = HibernateUtil.getSessionFactory().openSession()) {
 			transaction = session.beginTransaction();
-			session.update(transaction);;
+			session.update(user);
 			transaction.commit();
-		} catch (HibernateException e) {
+			return true;
+		} catch (Exception e) {
 			if (transaction != null) {
-				transaction.rollback();
+				try {
+					transaction.rollback();
+				} catch (RuntimeException re) {
+					logger.error("Rollback error: ", re);
+				}
 			}
-			throw e;
-		} finally {
-			if (session != null) {
-				session.close();
-			}
+			logger.error("Hibernate error: ", e);
+			return false;
 		}
 	}
-
-	public void updateUserFingerprint(User user, byte[] fingerprintData) throws HibernateException {
+        
+        public boolean updateUserFingerprint(User user, byte[] fingerprintData) {
 		if (user == null || user.getId() == null) {
 			throw new IllegalArgumentException("User and its ID must not be null for update.");
 		}

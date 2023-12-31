@@ -352,7 +352,7 @@ public class FingerprintManager {
     }
 
     public void saveUserFootprints() {
-        users = (ArrayList<User>) userDao.getUsers();
+        users = (ArrayList<User>) userDao.findAll();
         FingerprintSensorEx.DBClear(mhDB);
         for (User user : users) {
             byte[] fingerprintTemplate = user.getFingerprintPattern();
