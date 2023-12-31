@@ -39,23 +39,18 @@ public class RegistrationSystem {
 			System.out.println(registration);
 		}
 		user.setUsername("adri14");
-                user.setBaseSalary(800);
-                user.setSalaryRecived(user.getBaseSalary());
+		user.setBaseSalary(800);
+		user.setSalaryRecived(user.getBaseSalary());
 		user.setRole(User.Role.EMPLOYEE);
-		UserDao userdao = new UserDao();
-		userdao.saveUser(user);
-              
+		userdao.create(user);
 
 		System.out.println("User id= " + user.getId());
-                LocalDateTime horaEntradaEmpleado;  
-                LocalDateTime horaEntrada = LocalDateTime.of(2023, 12, 30, 8, 0);
-                 LocalDateTime horaSalida = LocalDateTime.of(2023, 12, 30, 13, 0);
-                Long idEmpleado = user.getId(); // Suponiendo que ya tienes un empleado con ID 1 en la base de datos
-                 FinesCalculator finesCalculator = new FinesCalculator();
+		LocalDateTime horaEntrada = LocalDateTime.of(2023, 12, 30, 8, 0);
+		LocalDateTime horaSalida = LocalDateTime.of(2023, 12, 30, 13, 0);
 
-               finesCalculator.procesarMultaEntrada(user.getId(), horaEntrada);
-                finesCalculator.procesarMultaSalida(user.getId(), horaSalida);
+		finesCalculator.procesarMultaEntrada(user.getId(), horaEntrada);
+		finesCalculator.procesarMultaSalida(user.getId(), horaSalida);
 		System.out.println("Usuario: " + user.getUsername());
-        System.out.println("Salario recibido después de multas: " + user.getSalaryRecived());
+		System.out.println("Salario recibido después de multas: " + user.getSalaryRecived());
 	}
 }
