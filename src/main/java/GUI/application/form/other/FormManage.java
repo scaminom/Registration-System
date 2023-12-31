@@ -5,13 +5,11 @@ import GUI.application.exceptionHandler.HibernateExceptionHandler;
 import GUI.application.exceptionHandler.UserValidator;
 import com.scrum.registrationsystem.dao.UserDao;
 import com.scrum.registrationsystem.entities.User;
+import java.util.stream.Collectors;
 import javax.swing.JOptionPane;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.table.DefaultTableModel;
 
 public class FormManage extends javax.swing.JPanel {
 
-	private final UserDao userManage;
 	private final ExceptionHandler exceptionHandler;
 	private UserValidator validator;
 
@@ -20,143 +18,115 @@ public class FormManage extends javax.swing.JPanel {
 	public FormManage() {
 		exceptionHandler = new HibernateExceptionHandler();
 		initComponents();
-		userManage = new UserDao();
-		chargeDataTable();
-		chargeTable();
+		loadDataToTable();
 	}
 
-	private void chargeDataTable() {
-		jtblEmployee.getSelectionModel().addListSelectionListener((ListSelectionEvent e) -> {
-			int row = jtblEmployee.getSelectedRow();
-			if (row != -1) {
-				populateFieldsFromTable(row);
+	public void loadDataToFields() {
+		var manager = new PanelManager(new UserDao());
+		manager.loadDataToFields(jtblEmployee, rowData -> {
+			jtxtName.setText(String.valueOf(rowData[1]));
+			jtxtSurname.setText(String.valueOf(rowData[2]));
+			jtxtUsername.setText(String.valueOf(rowData[3]));
+			jtxtPassword.setText(String.valueOf(rowData[4]));
+			jtxtEmail.setText(String.valueOf(rowData[5]));
+
+			String gender = String.valueOf(rowData[6]);
+			if ("Hombre".equals(gender)) {
+				jrdMale.setSelected(true);
+			} else if ("Mujer".equals(gender)) {
+				jrdFemale.setSelected(true);
 			}
 		});
 	}
 
-	private void chargeTable() {
-		DefaultTableModel model = new DefaultTableModel(COLUMN_NAMES, 0);
-		try {
-			var users = userManage.getUsers();
-			for (User user : users) {
-				model.addRow(new Object[]{user.getId(), user.getFirstName(), user.getLastName(), user.getUsername(), user.getPassword(), user.getEmail(), user.getGender()});
+	public void loadDataToTable() {
+
+		var manager = new PanelManager(new UserDao());
+		manager.loadDataToTable(jtblEmployee, (entity, tableModel) -> {
+			var users = entity.stream().map(user -> (User) user).collect(Collectors.toList());
+			for (int i = 0; i < users.size(); i++) {
+				Object[] object = {users.get(i).getId(), users.get(i).getFirstName(), users.get(i).getLastName(), users.get(i).getUsername(), users.get(i).getPassword(), users.get(i).getEmail(), users.get(i).getGender()};
+				tableModel.addRow(object);
 			}
-		} catch (Exception e) {
-			exceptionHandler.handleException(e);
-		}
-		jtblEmployee.setModel(model);
+			tableModel.setColumnIdentifiers(COLUMN_NAMES);
+		});
 	}
 
-	private void populateFieldsFromTable(int row) {
-		jtxtName.setText(String.valueOf(jtblEmployee.getValueAt(row, 1)));
-		jtxtSurname.setText(String.valueOf(jtblEmployee.getValueAt(row, 2)));
-		jtxtUsername.setText(String.valueOf(jtblEmployee.getValueAt(row, 3)));
-		jtxtPassword.setText(String.valueOf(jtblEmployee.getValueAt(row, 4)));
-		jtxtEmail.setText(String.valueOf(jtblEmployee.getValueAt(row, 5)));
-		String gender = String.valueOf(jtblEmployee.getValueAt(row, 6));
-		if ("Hombre".equals(gender)) {
-			jrdMale.setSelected(true);
-		} else if ("Mujer".equals(gender)) {
-			jrdFemale.setSelected(true);
+	public void saveUser() {
+		String firstName = jtxtName.getText();
+		String lastName = jtxtSurname.getText();
+		String username = jtxtUsername.getText();
+		String password = jtxtPassword.getText();
+		String email = jtxtEmail.getText();
+		String gender = jrdMale.isSelected() ? "Hombre" : "Mujer";
+		var role = User.Role.EMPLOYEE;
+		double initialSalary = 800.0;
+		var user = new User(firstName, lastName, username, password, role, email, gender, initialSalary);
+		validator = new UserValidator(user);
+		var errors = validator.validate();
+		if (errors.isEmpty()) {
+			var manager = new PanelManager(new UserDao());
+			manager.insertData(entity -> user);
+			cleanFields();
+			loadDataToTable();
+		} else {
+			errors.forEach((field, errorList) -> {
+				errorList.forEach(error
+						-> JOptionPane.showMessageDialog(null, error, "Error in " + field, JOptionPane.ERROR_MESSAGE));
+			});
 		}
 	}
 
-	private void saveUser() {
-		try {
-			String firstName = jtxtName.getText();
-			String lastName = jtxtSurname.getText();
-			String username = jtxtUsername.getText();
-			String password = jtxtPassword.getText();
-			String email = jtxtEmail.getText();
-			var role = User.Role.EMPLOYEE;
-			User user = null;
-			if (jrdMale.isSelected()) {
-				String male = "Hombre";
-				user = new User(firstName, lastName, username, password, role, email, male, 800);
-			} else {
-				String male = "Mujer";
-				user = new User(firstName, lastName, username, password, role, email, male, 800);
-			}
+	public void updateUser() {
+		int row = jtblEmployee.getSelectedRow();
+		if (row != -1) {
+			var user = new User();
+			user.setFirstName(jtxtName.getText());
+			user.setLastName(jtxtSurname.getText());
+			user.setUsername(jtxtUsername.getText());
+			user.setPassword(jtxtPassword.getText());
+			user.setEmail(jtxtEmail.getText());
+			user.setGender(jrdMale.isSelected() ? "Hombre" : "Mujer");
+
 			validator = new UserValidator(user);
 			var errors = validator.validate();
+
 			if (errors.isEmpty()) {
-				userManage.saveUser(user);
-				JOptionPane.showMessageDialog(null, "Empleado guardado exitosamente.");
+				var manager = new PanelManager(new UserDao());
+				manager.updateData(jtblEmployee, entity -> {
+					var userRecived = (User) entity;
+					userRecived.setFirstName(user.getFirstName());
+					userRecived.setLastName(user.getLastName());
+					userRecived.setUsername(user.getUsername());
+					userRecived.setPassword(user.getPassword());
+					userRecived.setEmail(user.getEmail());
+					userRecived.setGender(user.getGender());
+					return entity;
+				});
+
 				cleanFields();
-				chargeTable();
+				loadDataToTable();
 			} else {
 				errors.forEach((field, errorList) -> {
 					errorList.forEach(error
 							-> JOptionPane.showMessageDialog(null, error, "Error in " + field, JOptionPane.ERROR_MESSAGE));
 				});
 			}
-
-		} catch (Exception e) {
-			exceptionHandler.handleException(e);
+		} else {
+			JOptionPane.showMessageDialog(null, "Seleccione un usuario.", "Error", JOptionPane.ERROR_MESSAGE);
 		}
 	}
 
-	private void updateUser() {
-		try {
-			int row = jtblEmployee.getSelectedRow();
-			User user = null;
-			if (row != -1) {
-				Long id = Long.valueOf(jtblEmployee.getValueAt(row, 0).toString());
-				user = new User();
-				user.setId(id);
-				user.setFirstName(jtxtName.getText());
-				user.setLastName(jtxtSurname.getText());
-				user.setUsername(jtxtUsername.getText());
-				user.setPassword(jtxtPassword.getText());
-				user.setEmail(jtxtEmail.getText());
-				user.setRole(User.Role.EMPLOYEE);
-				if (jrdMale.isSelected()) {
-					user.setGender("Hombre");
-				} else {
-					user.setGender("Mujer");
-				}
-				int response = JOptionPane.showConfirmDialog(null, "Esta seguro de actualizar el empleado con el id " + id + "?", "Eliminar Usuario", JOptionPane.YES_NO_OPTION);
-				if (response == JOptionPane.YES_OPTION) {
-					validator = new UserValidator(user);
-					var errors = validator.validate();
-					if (errors.isEmpty()) {
-						userManage.updateUser(user);
-						cleanFields();
-						chargeTable();
-						JOptionPane.showMessageDialog(null, "Empleado actualizado exitosamente.");
-					} else {
-						errors.forEach((field, errorList) -> {
-							errorList.forEach(error
-									-> JOptionPane.showMessageDialog(null, error, "Error in " + field, JOptionPane.ERROR_MESSAGE));
-						});
-					}
-				}
-			} else {
-				JOptionPane.showMessageDialog(null, "Por favor, selecciona un empleado.", "Error", JOptionPane.ERROR_MESSAGE);
-			}
-		} catch (Exception e) {
-			exceptionHandler.handleException(e);
-		}
-	}
+	public void deleteUser() {
+		int row = jtblEmployee.getSelectedRow();
+		if (row != -1) {
+			var manager = new PanelManager(new UserDao());
+			manager.deleteData(jtblEmployee);
 
-	private void deleteUser() {
-		try {
-			int row = jtblEmployee.getSelectedRow();
-			if (row != -1) {
-				Long id = Long.valueOf(jtblEmployee.getValueAt(row, 0).toString());
-				int response = JOptionPane.showConfirmDialog(null, "Esta seguro de eliminar el empleado?", "Eliminar Usuario", JOptionPane.YES_NO_OPTION);
-				if (response == JOptionPane.YES_OPTION) {
-					userManage.deleteUser(id);
-					cleanFields();
-					chargeTable();
-					JOptionPane.showMessageDialog(null, "Empleado eliminado exitosamente.");
-				}
-			} else {
-				JOptionPane.showMessageDialog(null, "Por favor, selecciona un empleado.", "Error", JOptionPane.ERROR_MESSAGE);
-			}
-
-		} catch (Exception e) {
-			exceptionHandler.handleException(e);
+			loadDataToTable();
+			cleanFields();
+		} else {
+			JOptionPane.showMessageDialog(null, "Seleccione un usuario.", "Error", JOptionPane.ERROR_MESSAGE);
 		}
 	}
 
@@ -307,17 +277,22 @@ public class FormManage extends javax.swing.JPanel {
         jtblEmployee.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED, java.awt.Color.lightGray, java.awt.Color.lightGray, java.awt.Color.lightGray, java.awt.Color.lightGray));
         jtblEmployee.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null}
             },
             new String [] {
-                "Title 1", "Title 2", "Title 3", "Title 4"
+                "Title 1", "Title 2", "Title 3", "Title 4", "Title 5", "Title 6", "Title 7"
             }
         ));
         jtblEmployee.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         jtblEmployee.setShowGrid(true);
+        jtblEmployee.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jtblEmployeeMouseClicked(evt);
+            }
+        });
         jScrollPane1.setViewportView(jtblEmployee);
 
         jPanel2.add(jScrollPane1);
@@ -417,6 +392,10 @@ public class FormManage extends javax.swing.JPanel {
     private void jbtnCleanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbtnCleanActionPerformed
 		cleanFields();
     }//GEN-LAST:event_jbtnCleanActionPerformed
+
+    private void jtblEmployeeMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jtblEmployeeMouseClicked
+		loadDataToFields();
+    }//GEN-LAST:event_jtblEmployeeMouseClicked
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel jPanel1;

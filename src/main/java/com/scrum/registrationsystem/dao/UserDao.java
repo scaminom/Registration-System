@@ -1,62 +1,76 @@
 package com.scrum.registrationsystem.dao;
 
 import com.scrum.registrationsystem.entities.User;
+import com.scrum.registrationsystem.service.Repository;
 import com.scrum.registrationsystem.util.HibernateUtil;
+import jakarta.persistence.criteria.CriteriaQuery;
+import java.util.ArrayList;
 import java.util.List;
-import org.hibernate.HibernateException;
+import javax.swing.JOptionPane;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class UserDao {
+public class UserDao extends Repository<User> {
 
-	public void saveUser(User user) throws HibernateException {
-		Session session = null;
+	private static final Logger logger = (Logger) LoggerFactory.getLogger(UserDao.class);
+
+	public UserDao() {
+		super();
+	}
+
+	@Override
+	public User findById(Long id) {
+		try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+			return session.get(User.class, id);
+		} catch (Exception e) {
+			logger.error("Hibernate error: ", e);
+			JOptionPane.showMessageDialog(null,
+					"Hubo un error en la transacción, por favor intentelo de nuevo.",
+					"Error en la base de datos",
+					JOptionPane.ERROR_MESSAGE);
+		}
+		return null;
+	}
+
+	@Override
+	public List<User> findAll() {
+		try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+			CriteriaQuery<User> criteriaQuery = session.getCriteriaBuilder().createQuery(User.class);
+			criteriaQuery.from(User.class);
+			return session.createQuery(criteriaQuery).getResultList();
+		} catch (Exception e) {
+			logger.error("Hibernate error: ", e);
+		}
+		return null;
+	}
+
+	@Override
+	public boolean create(User user) {
 		Transaction transaction = null;
-		try {
-			session = HibernateUtil.getSessionFactory().openSession();
+		try (Session session = HibernateUtil.getSessionFactory().openSession()) {
 			transaction = session.beginTransaction();
 			session.save(user);
 			transaction.commit();
-		} catch (HibernateException e) {
+			return true;
+		} catch (Exception e) {
 			if (transaction != null) {
-				transaction.rollback();
+				try {
+					transaction.rollback();
+				} catch (RuntimeException re) {
+					logger.error("Rollback error: ", re);
+				}
 			}
-			throw e;
-		} finally {
-			if (session != null) {
-				session.close();
-			}
+			logger.error("Hibernate error: ", e);
+			return false;
 		}
 	}
 
-	public List<User> getUsers() throws HibernateException {
-		try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-			return session.createQuery("from User").list();
-		} catch (HibernateException e) {
-			throw e;
-		}
-	}
-
-	public User getUser(Long id) throws HibernateException {
-		if (id == null) {
-			throw new IllegalArgumentException("User ID must not be null.");
-		}
-		try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-			return (User) session.get(User.class, id);
-		} catch (HibernateException e) {
-			throw e;
-		}
-	}
-
-	public void updateUser(User user) throws HibernateException {
-		if (user == null || user.getId() == null) {
-			throw new IllegalArgumentException("User and its ID must not be null for update.");
-		}
-
-		Session session = null;
+	@Override
+	public boolean update(User user) {
 		Transaction transaction = null;
-		try {
-			session = HibernateUtil.getSessionFactory().openSession();
+		try (Session session = HibernateUtil.getSessionFactory().openSession()) {
 			transaction = session.beginTransaction();
 			session.update(transaction);;
 			transaction.commit();
@@ -85,41 +99,59 @@ public class UserDao {
 			user.setFingerprintPattern(fingerprintData);
 			session.update(user);
 			transaction.commit();
-		} catch (HibernateException e) {
+			return true;
+		} catch (Exception e) {
 			if (transaction != null) {
-				transaction.rollback();
+				try {
+					transaction.rollback();
+				} catch (RuntimeException re) {
+					logger.error("Rollback error: ", re);
+				}
 			}
-			throw e;
-		} finally {
-			if (session != null) {
-				session.close();
-			}
+			logger.error("Hibernate error: ", e);
+			return false;
 		}
 	}
 
-	public void deleteUser(Long id) throws HibernateException {
-		if (id == null) {
-			throw new IllegalArgumentException("User ID must not be null for deletion.");
-		}
-		Session session = null;
+	@Override
+	public boolean delete(Long id) {
 		Transaction transaction = null;
-		try {
-			session = HibernateUtil.getSessionFactory().openSession();
+		try (Session session = HibernateUtil.getSessionFactory().openSession()) {
 			transaction = session.beginTransaction();
-			User user = (User) session.get(User.class, id);
+			User user = session.get(User.class, id);
 			if (user != null) {
 				session.delete(user);
+				transaction.commit();
+				return true;
+			} else {
+				logger.info("User not found with ID: " + id);
+				return false;
 			}
-			transaction.commit();
-		} catch (HibernateException e) {
+		} catch (Exception e) {
 			if (transaction != null) {
-				transaction.rollback();
+				try {
+					transaction.rollback();
+				} catch (RuntimeException re) {
+					logger.error("Rollback error: ", re);
+				}
 			}
-			throw e;
-		} finally {
-			if (session != null) {
-				session.close();
-			}
+			logger.error("Hibernate error: ", e);
+			return false;
 		}
+	}
+
+	@Override
+	public User returnDataToTextFields(int idRow) {
+		try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+			return session.get(User.class, (long) idRow);
+		} catch (Exception e) {
+			logger.error("Hibernate error: ", e);
+		}
+		return null;
+	}
+
+	@Override
+	public List<Object[]> findFormattedAll() {
+		return new ArrayList<>();
 	}
 }

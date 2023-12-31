@@ -13,6 +13,7 @@ import com.scrum.registrationsystem.dao.RegisterDao;
 import com.scrum.registrationsystem.dao.UserDao;
 import com.scrum.registrationsystem.entities.Register;
 import com.scrum.registrationsystem.entities.User;
+import com.scrum.registrationsystem.service.FinesCalculator;
 import com.scrum.registrationsystem.util.HibernateUtil;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -26,56 +27,66 @@ import org.hibernate.query.Query;
 
 public class FormRegister extends javax.swing.JPanel implements FingerprintCallback {
 
-    private final ExceptionHandler exceptionHandler;
-    private final RegisterDao registerManage;
-    private final UserDao userDao;
-    Long Long = null;
+	private final ExceptionHandler exceptionHandler;
+	private final RegisterDao registerManage;
+	private final UserDao userDao;
+	Long Long = null;
+	private final FinesCalculator finesCalculator;
     FingerprintManager fingerprintManager = null;
     MyFingerprintCallback callback = null;
 
-    public FormRegister() {
-        initComponents();
-        inicializarHoraLabel();
-        exceptionHandler = new HibernateExceptionHandler();
-        registerManage = new RegisterDao();
-        userDao = new UserDao();
+	public FormRegister() {
+		initComponents();
+		inicializarHoraLabel();
+		exceptionHandler = new HibernateExceptionHandler();
+		registerManage = new RegisterDao();
+		userDao = new UserDao();
+		finesCalculator = new FinesCalculator();
         fingerprintManager = FingerprintManager.getInstance();
         callback = MyFingerprintCallback.getInstance(btnImg);
         fingerprintManager.addFingerprintCallback(callback);
         fingerprintManager.identify();
-    }
+	}
 
-    private void saveRegister(User user) {
-        try {
-            LocalDateTime entryTime = LocalDateTime.now();
-            Register register = new Register(entryTime, null, user);
-            user.addRegistration(register);
-            registerManage.saveRegister(register);
+	private void saveRegister() {
+		try {
+			LocalDateTime entryTime = LocalDateTime.now();
+			User user = userDao.findById(1L);
+			Register register = new Register(entryTime, null, user);
+			user.addRegistration(register);
+			registerManage.saveRegister(register);
+			var fine = finesCalculator.procesarMultaEntrada(user.getId(), entryTime);
+			user.addFines(fine);
+			JOptionPane.showMessageDialog(null, "Registro guardado exitosamente.");
+		} catch (Exception e) {
+			exceptionHandler.handleException(e);
+		}
+	}
 
-            JOptionPane.showMessageDialog(null, "Registro guardado exitosamente.");
-        } catch (Exception e) {
-            exceptionHandler.handleException(e);
-        }
-    }
-
-    private void updateRegister() {
-        try {
-            LocalDateTime exitTime = LocalDateTime.now();
-
-            Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-            Query<Long> query = session.createQuery(
-                    "SELECT id FROM Register WHERE user_id = :userId ORDER BY id DESC",
-                    Long.class);
-            query.setParameter("userId", userDao.getUser(Long.MIN_VALUE));
-            query.setMaxResults(1);
+	private void updateRegister() {
+		try {
+			LocalDateTime exitTime = LocalDateTime.now();
+			User user = userDao.findById(1L);
+			Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+			session.beginTransaction();
+			Query<Long> query = session.createQuery(
+					"SELECT r.id FROM Register r WHERE r.user.id = :userId ORDER BY r.id DESC",
+					Long.class
+			);
+			query.setParameter("userId", user.getId());
+			query.setMaxResults(1);
 
             Long ultimoIdRegistro = query.uniqueResult();
 
-            Register register = registerManage.getRegister(Long);
+			Register register = registerManage.getRegister(ultimoIdRegistro);
 
-            register.setExitTime(exitTime);
-            registerManage.updateRegister(register);
-            JOptionPane.showMessageDialog(null, "Registro guardado exitosamente.");
+			user.addRegistration(register);
+			register.setExitTime(exitTime);
+			registerManage.updateRegister(register);
+			var fine = finesCalculator.procesarMultaSalida(user.getId(), exitTime);
+			user.addFines(fine);
+
+			JOptionPane.showMessageDialog(null, "Registro guardado exitosamente.");
 
         } catch (Exception e) {
             exceptionHandler.handleException(e);
@@ -137,6 +148,11 @@ public class FormRegister extends javax.swing.JPanel implements FingerprintCallb
         });
 
         jButton2.setText("REGISTRAR SALIDA");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
 
         textArea.setColumns(20);
         textArea.setRows(5);
@@ -201,6 +217,10 @@ public class FormRegister extends javax.swing.JPanel implements FingerprintCallb
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_jButton1ActionPerformed
 
     }// GEN-LAST:event_jButton1ActionPerformed
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+		updateRegister();
+    }//GEN-LAST:event_jButton2ActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnImg;
