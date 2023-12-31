@@ -7,6 +7,7 @@ package com.scrum.registrationsystem.biometrics;
 import com.scrum.registrationsystem.dao.RegisterDao;
 import com.scrum.registrationsystem.entities.Register;
 import com.scrum.registrationsystem.entities.User;
+import com.scrum.registrationsystem.util.HibernateUtil;
 
 import GUI.application.exceptionHandler.ExceptionHandler;
 import GUI.application.exceptionHandler.HibernateExceptionHandler;
@@ -31,6 +32,7 @@ public class MyFingerprintCallback implements FingerprintCallback {
     private JButton btnImg = null;
     private final RegisterDao registerManage;
     private final ExceptionHandler exceptionHandler;
+    private final RegisterDao registerDao = new RegisterDao();
 
     public MyFingerprintCallback(JButton btnImage) {
         this.btnImg = btnImage;
@@ -65,15 +67,26 @@ public class MyFingerprintCallback implements FingerprintCallback {
 
     @Override
     public User onUserIdentify(User user) {
+
         try {
-            LocalDateTime entryTime = LocalDateTime.now();
-            Register register = new Register(entryTime, null, user);
-            user.addRegistration(register);
-            registerManage.saveRegister(register);
-            JOptionPane.showMessageDialog(null, "Registro guardado exitosamente.");
+            Register register = registerDao.findLastRecordByUser(user.getId());
+            if (register == null) {
+                LocalDateTime entryTime = LocalDateTime.now();
+                Register newRegister = new Register(entryTime, null, user);
+                user.addRegistration(newRegister);
+                registerManage.saveRegister(newRegister);
+                JOptionPane.showMessageDialog(null, user.getFirstName() + " " + user.getLastName() + " entrada registrada correctamente.");
+            } else if (register.getEntryTime() != null && register.getExitTime() == null) {
+                LocalDateTime exitTime = LocalDateTime.now();
+                user.addRegistration(register);
+                register.setExitTime(exitTime);
+                registerManage.updateRegister(register);
+                JOptionPane.showMessageDialog(null, user.getFirstName() + " " + user.getLastName() + " salida registrada correctamente.");
+            }
         } catch (Exception e) {
             exceptionHandler.handleException(e);
         }
+
         return user;
     }
 
@@ -102,7 +115,5 @@ public class MyFingerprintCallback implements FingerprintCallback {
     public void setBtnImg(JButton btnImg) {
         this.btnImg = btnImg;
     }
-
-    
 
 }
