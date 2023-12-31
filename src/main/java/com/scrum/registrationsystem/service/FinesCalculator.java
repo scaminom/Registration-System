@@ -29,8 +29,22 @@ public class FinesCalculator {
    }
 
     public double calcularMulta(Long userId, LocalDateTime hora, boolean esEntrada) {
-        // Obtener el último registro para este usuario
         Register ultimoRegistro = registerDao.getLastRegisterForUser(userId);
+         if (esEntrada && hora.getHour() >= HORA_INICIO_JORNADA_VESPERTINA) {
+            if (ultimoRegistro == null || ultimoRegistro.getEntryTime().getHour() >= HORA_INICIO_JORNADA_VESPERTINA) {
+            // Si se registra por primera vez en la tarde, cobrar la jornada matutina completa como multa
+            return 300 * MULTA_POR_MINUTO; // la mitad del día
+            }
+        }
+            // Comprobar si es una salida y si falta el registro de entrada en la tarde
+        if (!esEntrada && (ultimoRegistro != null && ultimoRegistro.getExitTime() == null)) {
+            // Si el último registro es de la mañana y no hay registro de entrada en la tarde
+            if (ultimoRegistro.getEntryTime().getHour() < HORA_INICIO_JORNADA_VESPERTINA && hora.getHour() >= HORA_FIN_JORNADA_VESPERTINA) {
+            // Aplicar multa por no registrar entrada en la jornada vespertina
+            return (HORA_FIN_JORNADA_VESPERTINA - HORA_INICIO_JORNADA_VESPERTINA) * 60 * MULTA_POR_MINUTO;
+            }
+        }
+        // Obtener el último registro para este usuario
         if (esEntrada && hora.getHour() >= HORA_FIN_JORNADA_VESPERTINA) {
             // Si se registra después de las 5 PM, cobrar toda la jornada como multa
             return MINUTOS_JORNADA_COMPLETA * MULTA_POR_MINUTO;

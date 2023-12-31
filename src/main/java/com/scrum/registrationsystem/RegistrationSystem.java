@@ -17,22 +17,22 @@ public class RegistrationSystem {
 
 	public static void main(String[] args) {
 		User user = new User();
-//		user.setFirstName("Adrian");
-//		user.setLastName("Jurado");
-//		user.setEmail("test16@gmail.com");
-//		user.setPassword("test1234");
-//		user.setUsername("adri7");
-//                user.setBaseSalary(800);
-//                user.setSalaryRecived(user.getBaseSalary());
-//		user.setRole(User.Role.EMPLOYEE);
+		user.setFirstName("Adrian");
+		user.setLastName("Jurado");
+		user.setEmail("test23@gmail.com");
+		user.setPassword("test1234");
+		user.setUsername("adri14");
+                user.setBaseSalary(800);
+                user.setSalaryRecived(user.getBaseSalary());
+		user.setRole(User.Role.EMPLOYEE);
 		UserDao userdao = new UserDao();
-		user = userdao.getUser(10L);
+		userdao.saveUser(user);
               
 
 		System.out.println("User id= " + user.getId());
                 LocalDateTime horaEntradaEmpleado;  
-                LocalDateTime horaEntrada = LocalDateTime.of(2023, 12, 30, 17, 0);
-                 LocalDateTime horaSalida = LocalDateTime.of(2023, 12, 30, 17, 0);
+                LocalDateTime horaEntrada = LocalDateTime.of(2023, 12, 30, 8, 0);
+                 LocalDateTime horaSalida = LocalDateTime.of(2023, 12, 30, 13, 0);
                 Long idEmpleado = user.getId(); // Suponiendo que ya tienes un empleado con ID 1 en la base de datos
                  FinesCalculator finesCalculator = new FinesCalculator();
 
