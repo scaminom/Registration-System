@@ -57,12 +57,17 @@ public class User implements Serializable {
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	private List<Register> registrations;
 
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	private List<Fines> fines;
+
 	public User() {
 		registrations = new ArrayList<>();
+		fines = new ArrayList<>();
 	}
 
 	public User(String firstName, String lastName, String username, String password, Role role, String email, String gender, double salaryRecived) {
 		registrations = new ArrayList<>();
+		fines = new ArrayList<>();
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.username = username;
@@ -168,6 +173,19 @@ public class User implements Serializable {
 
 	public void setRegistrations(List<Register> registrations) {
 		this.registrations = registrations;
+	}
+
+	public List<Fines> getFines() {
+		return fines;
+	}
+
+	public void setFines(List<Fines> fines) {
+		this.fines = fines;
+	}
+
+	public void addFines(Fines fine) {
+		fines.add(fine);
+		fine.setUser(this);
 	}
 
 	public void addRegistration(Register registration) {
