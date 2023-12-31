@@ -2,22 +2,25 @@ package com.scrum.registrationsystem.entities;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import java.io.Serializable;
 
 @Entity
 @Table(name = "Fines")
-public class Fines implements Serializable {
+public class Fines {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "id_employee", nullable = false)
-    private Long idEmployee;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_user", referencedColumnName = "id", nullable = false)
+    private User user;
 
     @Column(name = "description", nullable = false)
     private String description;
@@ -28,8 +31,8 @@ public class Fines implements Serializable {
     public Fines() {
     }
 
-    public Fines(Long idEmployee, String description, double constFine) {
-        this.idEmployee = idEmployee;
+    public Fines(User user, String description, double constFine) {
+        this.user = user;
         this.description = description;
         this.costFine = constFine;
     }
@@ -42,12 +45,12 @@ public class Fines implements Serializable {
         this.id = id;
     }
 
-    public Long getIdEmpleado() {
-        return idEmployee;
+    public User getUser() {
+        return user;
     }
 
-    public void setIdEmpleado(Long idEmployee) {
-        this.idEmployee = idEmployee;
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public String getDescripcion() {

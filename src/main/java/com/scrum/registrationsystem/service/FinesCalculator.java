@@ -49,12 +49,12 @@ public class FinesCalculator {
         double multaEntrada = calcularMultaEntrada(horaEntrada);
 	User user = null;
         if (multaEntrada > 0) {
+            user = userManage.getUser(idEmpleado);
             Fines multa = new Fines ();
-            multa.setIdEmpleado(idEmpleado);
+            multa.setUser(user);
             multa.setDescripcion("Multa por entrada tardía");
             multa.setValorMulta(multaEntrada);
             finesManage.saveMulta(multa);
-	    user = userManage.getUser(idEmpleado);
             user.setId(idEmpleado);
 	    user.setFirstName(user.getFirstName());
 	    user.setLastName(user.getLastName());
@@ -72,12 +72,12 @@ public class FinesCalculator {
         double multaSalida = calcularMultaSalida(horaSalida);
 	User user = null;
         if (multaSalida > 0) {
+            user = userManage.getUser(idEmpleado);
             Fines multa = new Fines();
-            multa.setIdEmpleado(idEmpleado);
+            multa.setUser(user);
             multa.setDescripcion("Multa por salida temprana");
             multa.setValorMulta(multaSalida);
             finesManage.saveMulta(multa);
-	    user = userManage.getUser(idEmpleado);
             user.setId(idEmpleado);
 	    user.setFirstName(user.getFirstName());
 	    user.setLastName(user.getLastName());
