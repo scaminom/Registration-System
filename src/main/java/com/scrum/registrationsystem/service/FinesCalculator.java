@@ -1,11 +1,11 @@
 package com.scrum.registrationsystem.service;
 
-import com.scrum.registrationsystem.entities.Fines;
-import com.scrum.registrationsystem.entities.User;
 import com.scrum.registrationsystem.dao.FinesDAO;
 import com.scrum.registrationsystem.dao.RegisterDao;
 import com.scrum.registrationsystem.dao.UserDao;
 import com.scrum.registrationsystem.entities.Register;
+import com.scrum.registrationsystem.entities.Fines;
+import com.scrum.registrationsystem.entities.User;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;

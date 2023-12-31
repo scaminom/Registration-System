@@ -10,6 +10,7 @@ import com.scrum.registrationsystem.dao.RegisterDao;
 import com.scrum.registrationsystem.dao.UserDao;
 import com.scrum.registrationsystem.entities.Register;
 import com.scrum.registrationsystem.entities.User;
+import com.scrum.registrationsystem.service.FinesCalculator;
 import com.scrum.registrationsystem.util.HibernateUtil;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -20,7 +21,6 @@ import javax.swing.JOptionPane;
 import javax.swing.Timer;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
-import com.scrum.registrationsystem.service.FinesCalculator;
 
 public class FormRegister extends javax.swing.JPanel {
 
@@ -28,7 +28,7 @@ public class FormRegister extends javax.swing.JPanel {
 	private final RegisterDao registerManage;
 	private final UserDao userDao;
 	Long Long = null;
-        private final FinesCalculator finesCalculator;
+	private final FinesCalculator finesCalculator;
 
 	public FormRegister() {
 		initComponents();
@@ -36,17 +36,18 @@ public class FormRegister extends javax.swing.JPanel {
 		exceptionHandler = new HibernateExceptionHandler();
 		registerManage = new RegisterDao();
 		userDao = new UserDao();
-                finesCalculator = new FinesCalculator();
+		finesCalculator = new FinesCalculator();
 	}
 
 	private void saveRegister() {
 		try {
 			LocalDateTime entryTime = LocalDateTime.now();
-			User user = userDao.getUser(19L);
+			User user = userDao.getUser(5L);
 			Register register = new Register(entryTime, null, user);
 			user.addRegistration(register);
 			registerManage.saveRegister(register);
-                         finesCalculator.procesarMultaEntrada(user.getId(), entryTime);
+			var fine = finesCalculator.procesarMultaEntrada(user.getId(), entryTime);
+			user.addFines(fine);
 			JOptionPane.showMessageDialog(null, "Registro guardado exitosamente.");
 		} catch (Exception e) {
 			exceptionHandler.handleException(e);
@@ -56,23 +57,26 @@ public class FormRegister extends javax.swing.JPanel {
 	private void updateRegister() {
 		try {
 			LocalDateTime exitTime = LocalDateTime.now();
-                        User user = userDao.getUser(19L);
+			User user = userDao.getUser(5L);
 			Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+			session.beginTransaction();
 			Query<Long> query = session.createQuery(
-					"SELECT id FROM Register WHERE user_id = :userId ORDER BY id DESC",
+					"SELECT r.id FROM Register r WHERE r.user.id = :userId ORDER BY r.id DESC",
 					Long.class
 			);
-			query.setParameter("userId", user);
+			query.setParameter("userId", user.getId());
 			query.setMaxResults(1);
-                            
+
 			Long ultimoIdRegistro = query.uniqueResult();
 
-			Register register = registerManage.getRegister(Long);
+			Register register = registerManage.getRegister(ultimoIdRegistro);
 
+			user.addRegistration(register);
 			register.setExitTime(exitTime);
 			registerManage.updateRegister(register);
-                         // Procesar multa de salida
-                        finesCalculator.procesarMultaSalida(user.getId(), exitTime);
+			var fine = finesCalculator.procesarMultaSalida(user.getId(), exitTime);
+			user.addFines(fine);
+
 			JOptionPane.showMessageDialog(null, "Registro guardado exitosamente.");
 
 		} catch (Exception e) {
@@ -132,6 +136,11 @@ public class FormRegister extends javax.swing.JPanel {
         });
 
         jButton2.setText("REGISTRAR SALIDA");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
 
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -172,7 +181,7 @@ public class FormRegister extends javax.swing.JPanel {
                     .addGroup(layout.createSequentialGroup()
                         .addGap(196, 196, 196)
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 672, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(240, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addGap(0, 0, Short.MAX_VALUE)
                 .addComponent(jLabel1)
@@ -198,6 +207,10 @@ public class FormRegister extends javax.swing.JPanel {
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
 		saveRegister();
     }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+		updateRegister();
+    }//GEN-LAST:event_jButton2ActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel hora;
