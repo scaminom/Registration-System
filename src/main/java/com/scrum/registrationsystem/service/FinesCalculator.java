@@ -74,7 +74,7 @@ public class FinesCalculator {
 		Fines multa = new Fines();
 
 		if (multaTotal > 0) {
-			User user = userManage.getUser(idEmpleado);
+			User user = userManage.findById(idEmpleado);
 
 			// Crear y guardar la multa
 			multa.setUser(user);
@@ -97,7 +97,7 @@ public class FinesCalculator {
 				user.setSalaryRecived(0);
 			}
 
-			userManage.updateUser(user);
+			userManage.update(user);
 		}
 		return multa;
 	}
@@ -107,7 +107,7 @@ public class FinesCalculator {
 		User user = null;
 		Fines multa = new Fines();
 		if (multaSalida > 0) {
-			user = userManage.getUser(idEmpleado);
+			user = userManage.findById(idEmpleado);
 			multa.setUser(user);
 			multa.setDescripcion("Multa por salida temprana");
 			multa.setValorMulta(multaSalida);
@@ -125,7 +125,7 @@ public class FinesCalculator {
 			} else {
 				user.setSalaryRecived(0);
 			}
-			userManage.updateUser(user);
+			userManage.update(user);
 
 		}
 		return multa;
