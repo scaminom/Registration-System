@@ -3,7 +3,9 @@ package com.scrum.registrationsystem.service;
 import com.scrum.registrationsystem.entities.Fines;
 import com.scrum.registrationsystem.entities.User;
 import com.scrum.registrationsystem.dao.FinesDAO;
+import com.scrum.registrationsystem.dao.RegisterDao;
 import com.scrum.registrationsystem.dao.UserDao;
+import com.scrum.registrationsystem.entities.Register;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
@@ -12,120 +14,129 @@ public class FinesCalculator {
 
    private final FinesDAO finesManage;
    private final UserDao userManage;
+   private final RegisterDao registerDao;
+   private static final double MULTA_POR_MINUTO = 0.25;
+    private static final int HORA_INICIO_JORNADA_MATUTINA = 8; // 8 AM
+    private static final int HORA_FIN_JORNADA_MATUTINA = 13; // 1 PM
+    private static final int HORA_INICIO_JORNADA_VESPERTINA = 14; // 2 PM
+    private static final int HORA_FIN_JORNADA_VESPERTINA = 17; // 5 PM
+    private static final int MINUTOS_JORNADA_COMPLETA = 480; // 8 horas
    
    public FinesCalculator(){
 	finesManage = new FinesDAO();
 	userManage = new UserDao();
+        registerDao = new RegisterDao();
    }
 
-   public double calcularMultaMatutina(LocalDateTime horaEntrada) {
-        double multa = 0.0;
-        LocalTime inicioJornadaMatutina = LocalTime.of(8, 0);
-        LocalTime finJornadaMatutina = LocalTime.of(13, 0);
-        LocalTime horaEntradaTime = horaEntrada.toLocalTime();
-
-        long minutosTarde = 0;
-        if (horaEntradaTime.isAfter(inicioJornadaMatutina) && horaEntradaTime.isBefore(finJornadaMatutina)) {
-            minutosTarde = ChronoUnit.MINUTES.between(inicioJornadaMatutina, horaEntradaTime);
+    public double calcularMulta(Long userId, LocalDateTime hora, boolean esEntrada) {
+        // Obtener el último registro para este usuario
+        Register ultimoRegistro = registerDao.getLastRegisterForUser(userId);
+        if (esEntrada && hora.getHour() >= HORA_FIN_JORNADA_VESPERTINA) {
+            // Si se registra después de las 5 PM, cobrar toda la jornada como multa
+            return MINUTOS_JORNADA_COMPLETA * MULTA_POR_MINUTO;
         }
-        multa = minutosTarde * 0.25;
-        return multa;
-    }
-
-    public double calcularMultaVespertina(LocalDateTime horaEntrada) {
-        double multa = 0.0;
-        LocalTime inicioJornadaVespertina = LocalTime.of(14, 0);
-        LocalTime finJornada = LocalTime.of(17, 0);
-        LocalTime horaEntradaTime = horaEntrada.toLocalTime();
-
-        long minutosTarde = 0;
-        if (horaEntradaTime.isAfter(inicioJornadaVespertina) && horaEntradaTime.isBefore(finJornada)) {
-            minutosTarde = ChronoUnit.MINUTES.between(inicioJornadaVespertina, horaEntradaTime);
-        } else if(horaEntradaTime.isAfter(finJornada)){
-            minutosTarde = 480;
-        }
-         multa = minutosTarde * 0.25;
-        return multa;
-    }
-
-    public double calcularMultaSalida(LocalDateTime horaSalida) {
-        double multa = 0.0;
-        LocalTime finJornadaMatutina = LocalTime.of(13, 0);
-        LocalTime inicioJornadaVespertina = LocalTime.of(14, 0);
-        LocalTime finJornada = LocalTime.of(17, 0);
-        LocalTime horaSalidaTime = horaSalida.toLocalTime();
-
-        if (horaSalidaTime.isBefore(finJornadaMatutina) || (horaSalidaTime.isBefore(finJornada) && horaSalidaTime.isAfter(inicioJornadaVespertina))) {
-            LocalTime finJornadaReal = horaSalidaTime.isBefore(finJornadaMatutina) ? finJornadaMatutina : finJornada;
-            long minutosTemprano = ChronoUnit.MINUTES.between(horaSalidaTime, finJornadaReal);
-            multa = minutosTemprano * 0.25;
+        
+        if (ultimoRegistro == null) {
+            // Si no hay registros previos, calcular multa normalmente
+            return calcularMultaBasica(hora, esEntrada);
         }
 
-        return multa;
+        // Determinar si ya se ha registrado en la jornada matutina/vespertina
+        boolean yaRegistradoMatutina = ultimoRegistro.getEntryTime().getHour() < HORA_FIN_JORNADA_MATUTINA;
+        boolean yaRegistradoVespertina = ultimoRegistro.getEntryTime().getHour() >= HORA_INICIO_JORNADA_VESPERTINA;
+
+        // Calcular multa en base a si ya se ha registrado
+        if (esEntrada) {
+            if (yaRegistradoMatutina && hora.getHour() >= HORA_INICIO_JORNADA_VESPERTINA) {
+                // Caso especial: Ya registrado en matutina, pero llega tarde en vespertina
+                return calcularMultaDesdeHasta(hora, HORA_INICIO_JORNADA_VESPERTINA, HORA_FIN_JORNADA_VESPERTINA);
+            }
+            return calcularMultaBasica(hora, true);
+        } else {
+            if (yaRegistradoVespertina) {
+                // Si ya se registró en la vespertina, no hay multa por salida
+                return 0;
+            }
+            return calcularMultaBasica(hora, false);
+        }
     }
 
-   public void procesarMultaEntrada(Long idEmpleado, LocalDateTime horaEntrada) {
-    // Calcula las multas para cada jornada
-    double multaMatutina = calcularMultaMatutina(horaEntrada);
-    double multaVespertina = calcularMultaVespertina(horaEntrada);
+private double calcularMultaBasica(LocalDateTime hora, boolean esEntrada) {
+    int horaInicio;
+    int horaFin;
 
-    // Suma las multas para obtener la multa total
-    double multaTotal = multaMatutina + multaVespertina;
+    if (esEntrada) {
+        if (hora.getHour() >=  HORA_INICIO_JORNADA_VESPERTINA) {
+            // Entrada vespertina
+            horaInicio = HORA_INICIO_JORNADA_VESPERTINA;
+            horaFin = HORA_FIN_JORNADA_VESPERTINA;
+        } else {
+            // Entrada matutina
+            horaInicio = HORA_INICIO_JORNADA_MATUTINA;
+            horaFin = HORA_FIN_JORNADA_MATUTINA;
+        }
 
-    if (multaTotal > 0) {
-        User user = userManage.getUser(idEmpleado);
+        long minutosDiferencia = ChronoUnit.MINUTES.between(LocalDateTime.of(hora.toLocalDate(), hora.toLocalTime().withHour(horaInicio).withMinute(0)), hora);
+        return (minutosDiferencia > 0) ? minutosDiferencia * MULTA_POR_MINUTO : 0;
+    } else {
+        horaInicio = (hora.getHour() < HORA_INICIO_JORNADA_VESPERTINA) ? HORA_INICIO_JORNADA_MATUTINA : HORA_INICIO_JORNADA_VESPERTINA;
+        horaFin = (hora.getHour() < HORA_INICIO_JORNADA_VESPERTINA) ? HORA_FIN_JORNADA_MATUTINA : HORA_FIN_JORNADA_VESPERTINA;
 
-        // Crear y guardar la multa
-        Fines multa = new Fines();
+        long minutosDiferencia = ChronoUnit.MINUTES.between(hora, LocalDateTime.of(hora.toLocalDate(), hora.toLocalTime().withHour(horaFin).withMinute(0)));
+        return (minutosDiferencia > 0) ? minutosDiferencia * MULTA_POR_MINUTO : 0;
+    }
+}
+    
+
+    private double calcularMultaDesdeHasta(LocalDateTime hora, int horaInicio, int horaFin) {
+        long minutosDiferencia = ChronoUnit.MINUTES.between(LocalDateTime.of(hora.toLocalDate(), hora.toLocalTime().withHour(horaInicio).withMinute(0)), LocalDateTime.of(hora.toLocalDate(), hora.toLocalTime().withHour(horaFin).withMinute(0)));
+        if (minutosDiferencia < 0) {
+            return 0;
+        }
+        return minutosDiferencia * MULTA_POR_MINUTO;
+    }
+
+
+public void procesarMultaEntrada(Long idEmpleado, LocalDateTime horaEntrada) {
+        double multaTotal = calcularMulta(idEmpleado, horaEntrada, true);
+        User user = null;
+        if (multaTotal > 0) {
+            user = userManage.getUser(idEmpleado);
+             Fines multa = new Fines();
         multa.setUser(user);
         multa.setDescripcion("Multa por entrada tardía");
         multa.setValorMulta(multaTotal);
         finesManage.saveMulta(multa);
 
-        // Actualizar la información del usuario
-        user.setId(idEmpleado);
-        user.setFirstName(user.getFirstName());
-        user.setLastName(user.getLastName());
-        user.setUsername(user.getUsername());
-        user.setPassword(user.getPassword());
-        user.setEmail(user.getEmail());
-        user.setRole(user.getRole());
-        user.setBaseSalary(user.getBaseSalary());
-        if (user.getSalaryRecived() > 0) {
-            user.setSalaryRecived(user.getSalaryRecived() - multaTotal);
-        } else {
-            user.setSalaryRecived(0);
+            actualizarSalarioUsuario(user, multaTotal);
         }
-        
-        userManage.updateUser(user);
     }
-}
 
     public void procesarMultaSalida(Long idEmpleado, LocalDateTime horaSalida) {
-        double multaSalida = calcularMultaSalida(horaSalida);
-	User user = null;
+        double multaSalida = calcularMulta(idEmpleado, horaSalida, false);
+        User user = null;
         if (multaSalida > 0) {
-            user = userManage.getUser(idEmpleado);
+             user = userManage.getUser(idEmpleado);
             Fines multa = new Fines();
             multa.setUser(user);
             multa.setDescripcion("Multa por salida temprana");
             multa.setValorMulta(multaSalida);
             finesManage.saveMulta(multa);
-            user.setId(idEmpleado);
+
+            actualizarSalarioUsuario(user, multaSalida);
+        }
+    }
+
+    private void actualizarSalarioUsuario(User user, double ajusteSalario) {
+            double salarioActual = user.getSalaryRecived();
+            user.setId(user.getId());
 	    user.setFirstName(user.getFirstName());
 	    user.setLastName(user.getLastName());
 	    user.setUsername(user.getUsername());
 	    user.setPassword(user.getPassword());
 	    user.setEmail(user.getEmail());
 	    user.setRole(user.getRole());
-	    user.setBaseSalary(user.getBaseSalary());
-	            if (user.getSalaryRecived() > 0) {
-            user.setSalaryRecived(user.getSalaryRecived() - multaSalida);
-        } else {
-            user.setSalaryRecived(0);
-        }
-	    userManage.updateUser(user);
-
-        }
+            user.setSalaryRecived(Math.max(0, salarioActual - ajusteSalario));
+            userManage.updateUser(user);
     }
 }
