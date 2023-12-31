@@ -20,6 +20,7 @@ import javax.swing.JOptionPane;
 import javax.swing.Timer;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
+import com.scrum.registrationsystem.service.FinesCalculator;
 
 public class FormRegister extends javax.swing.JPanel {
 
@@ -27,6 +28,7 @@ public class FormRegister extends javax.swing.JPanel {
 	private final RegisterDao registerManage;
 	private final UserDao userDao;
 	Long Long = null;
+        private final FinesCalculator finesCalculator;
 
 	public FormRegister() {
 		initComponents();
@@ -34,16 +36,17 @@ public class FormRegister extends javax.swing.JPanel {
 		exceptionHandler = new HibernateExceptionHandler();
 		registerManage = new RegisterDao();
 		userDao = new UserDao();
+                finesCalculator = new FinesCalculator();
 	}
 
 	private void saveRegister() {
 		try {
 			LocalDateTime entryTime = LocalDateTime.now();
-			User user = userDao.getUser(4L);
+			User user = userDao.getUser(10L);
 			Register register = new Register(entryTime, null, user);
 			user.addRegistration(register);
 			registerManage.saveRegister(register);
-
+                         finesCalculator.procesarMultaEntrada(user.getId(), entryTime);
 			JOptionPane.showMessageDialog(null, "Registro guardado exitosamente.");
 		} catch (Exception e) {
 			exceptionHandler.handleException(e);
@@ -53,21 +56,23 @@ public class FormRegister extends javax.swing.JPanel {
 	private void updateRegister() {
 		try {
 			LocalDateTime exitTime = LocalDateTime.now();
-
+                        User user = userDao.getUser(10L);
 			Session session = HibernateUtil.getSessionFactory().getCurrentSession();
 			Query<Long> query = session.createQuery(
 					"SELECT id FROM Register WHERE user_id = :userId ORDER BY id DESC",
 					Long.class
 			);
-			query.setParameter("userId", userDao.getUser(Long.MIN_VALUE));
+			query.setParameter("userId", user);
 			query.setMaxResults(1);
-
+                            
 			Long ultimoIdRegistro = query.uniqueResult();
 
 			Register register = registerManage.getRegister(Long);
 
 			register.setExitTime(exitTime);
 			registerManage.updateRegister(register);
+                         // Procesar multa de salida
+                        finesCalculator.procesarMultaSalida(user.getId(), exitTime);
 			JOptionPane.showMessageDialog(null, "Registro guardado exitosamente.");
 
 		} catch (Exception e) {

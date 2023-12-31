@@ -64,27 +64,6 @@ public class MainForm extends JLayeredPane {
         menuButton.setIcon(new FlatSVGIcon("GUI/icon/svg/" + icon, 0.8f));
     }
 
-<<<<<<< HEAD
-	private void initMenuEvent() {
-		menu.addMenuEvent((int index, int subIndex, MenuAction action) -> {
-			if (index == 0) {
-				Application.showForm(new FormDashboard());
-			} else if (index == 1) {
-				if (subIndex == 1) {
-					Application.showForm(new FormManage());
-				}
-                        
-			} else if(index == 2){
-                                Application.showForm(new FormFines());
-                        }
-                        else if (index == 3) {
-				Application.logout();
-			} else {
-				action.cancel();
-			}
-		});
-	}
-=======
     private void initMenuEvent() {
         menu.addMenuEvent((int index, int subIndex, MenuAction action) -> {
             if (index == 0) {
@@ -93,11 +72,11 @@ public class MainForm extends JLayeredPane {
                 if (subIndex == 1) {
                     Application.showForm(new FormManage());
                 }
->>>>>>> a763b064c0f233d23b8f9b88652292d51f632d45
-
             } else if (index == 2) {
                    Application.showForm(new FormRegister());
-            } else if (index == 3) {
+            } else if(index == 3){
+                    Application.showForm(new FormFines());
+            } else if (index == 4) {
                 Application.logout();
             } else {
                 action.cancel();
