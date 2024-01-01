@@ -22,7 +22,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
 public class Application extends javax.swing.JFrame {
-
     private static Application app;
     private static MainForm mainForm;
     private final LoginForm loginForm;
@@ -32,7 +31,7 @@ public class Application extends javax.swing.JFrame {
     FingerprintManager fingerprintManager = null;
     MyFingerprintCallback callback = null;
     private static User userLogged = null;
-
+    
     public Application() {
         initComponents();
         setSize(new Dimension(1366, 768));

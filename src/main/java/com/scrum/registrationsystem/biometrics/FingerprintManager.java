@@ -4,14 +4,14 @@
  */
 package com.scrum.registrationsystem.biometrics;
 
-import com.huella.huelladigital.FingerprintSensorErrorCode;
-import com.huella.huelladigital.FingerprintSensorEx;
 import com.scrum.registrationsystem.dao.UserDao;
 import com.scrum.registrationsystem.entities.User;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import resources.FingerPrintSDK.FingerprintSensorErrorCode;
+import resources.FingerPrintSDK.FingerprintSensorEx;
 
 public class FingerprintManager {
     private static FingerprintManager instance;
