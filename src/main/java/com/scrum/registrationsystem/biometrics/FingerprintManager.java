@@ -4,10 +4,10 @@
  */
 package com.scrum.registrationsystem.biometrics;
 
+import com.huella.huelladigital.FingerprintSensorErrorCode;
+import com.huella.huelladigital.FingerprintSensorEx;
 import com.scrum.registrationsystem.dao.UserDao;
 import com.scrum.registrationsystem.entities.User;
-import com.zkteco.biometric.FingerprintSensorErrorCode;
-import com.zkteco.biometric.FingerprintSensorEx;
 
 import java.io.IOException;
 import java.util.ArrayList;
