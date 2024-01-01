@@ -13,28 +13,25 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.JOptionPane;
-
 public class FingerprintManager {
     private static FingerprintManager instance;
 
-    
     int fpWidth = 0;
-    
+
     int fpHeight = 0;
-   
+
     private byte[] lastRegTemp = new byte[2048];
-    
+
     private int cbRegTemp = 0;
-  
+
     private boolean bRegister = false;
-    
+
     private boolean bIdentify = true;
-   
+
     private int iFid = 1;
 
     private int nFakeFunOn = 1;
-    
+
     static final int enroll_cnt = 3;
 
     private byte[] imgbuf = null;
@@ -63,7 +60,7 @@ public class FingerprintManager {
             return;
         }
         int ret = FingerprintSensorErrorCode.ZKFP_ERR_OK;
-       
+
         cbRegTemp = 0;
         bRegister = false;
         bIdentify = false;
@@ -75,18 +72,18 @@ public class FingerprintManager {
         }
         ret = FingerprintSensorEx.GetDeviceCount();
         if (ret < 0) {
-           
+
             notifyFingerprintError("No se detectó el dispositivo!");
             return;
         }
         if (0 == (mhDevice = FingerprintSensorEx.OpenDevice(0))) {
-            
-             notifyFingerprintError("Error al abrir el dispositivo!");
+
+            notifyFingerprintError("Error al abrir el dispositivo!");
             return;
         }
         if (0 == (mhDB = FingerprintSensorEx.DBInit())) {
-            
-             notifyFingerprintError("Error al inicializar la base de datos!");
+
+            notifyFingerprintError("Error al inicializar la base de datos!");
             return;
         }
 
@@ -264,12 +261,12 @@ public class FingerprintManager {
                         int[] size = new int[1];
                         size[0] = 4;
                         int nFakeStatus = 0;
-                     
+
                         ret = FingerprintSensorEx.GetParameters(mhDevice, 2004, paramValue, size);
                         nFakeStatus = byteArrayToInt(paramValue);
                         System.out.println("ret = " + ret + ",nFakeStatus=" + nFakeStatus);
                         if (0 == ret && (byte) (nFakeStatus & 31) != 31) {
-                            notifyFingerprintError("Is a fake-finer?");
+                            notifyFingerprintError("Huella no valida?");
                             return;
                         }
                     }
@@ -309,7 +306,7 @@ public class FingerprintManager {
             int[] score = new int[1];
             int ret = FingerprintSensorEx.DBIdentify(mhDB, template, fid, score);
             if (ret == 0) {
-                notifyFingerprintError("Ya huella ya esta registrada " + fid[0] + ",cancel enroll");
+                notifyFingerprintError("Ya huella ya esta registrada!");
                 return;
             }
         } else if (bIdentify) {
@@ -338,7 +335,7 @@ public class FingerprintManager {
                 notifyFingerprintError("No se encontro el usuario");
             }
         } else {
-            notifyFingerprintError("Fallo la idenficación, errcode=" + ret);
+            notifyFingerprintError("Fallo la idenficación, no se encontro el usuario");
         }
     }
 

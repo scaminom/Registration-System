@@ -174,8 +174,6 @@ public class FormFingerprint extends javax.swing.JPanel {
                         if (errors.isEmpty()) {
                                 userSelected.setFingerprintPattern(fingerprintManager.getTemplate());
                                 ud.updateUserFingerprint(userSelected, fingerprintManager.getTemplate());
-                                jtxtVer.setText("La huella del usuario " + userSelected.getFirstName() + " "
-                                                + userSelected.getLastName() + "\nse guardo correctamente.");
                                 fingerprintManager.saveUserFootprints();
 
                         } else {
@@ -186,8 +184,6 @@ public class FormFingerprint extends javax.swing.JPanel {
                                         });
                                 });
                                 String error = errorBuilder.toString();
-
-                                jtxtVer.setText(error);
                         }
                 } catch (Exception e) {
                         exceptionHandler.handleException(e);
