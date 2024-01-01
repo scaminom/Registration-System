@@ -5,7 +5,6 @@ import GUI.application.form.other.FormDashboard;
 import GUI.application.form.other.FormFingerprint;
 import GUI.application.form.other.FormFines;
 import GUI.application.form.other.FormManage;
-import GUI.application.form.other.FormRegister;
 import GUI.application.form.other.FormRegistrationsReports;
 import GUI.application.form.other.FormRegistrationsSalary;
 import GUI.menu.Menu;
@@ -92,6 +91,8 @@ public class MainForm extends JLayeredPane {
             }
         });
     }
+
+    
 
     private void setMenuFull(boolean full) {
         String icon;

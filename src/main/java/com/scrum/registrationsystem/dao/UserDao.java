@@ -156,4 +156,38 @@ public class UserDao extends Repository<User> {
 	public List<Object[]> findFormattedAll() {
 		return new ArrayList<>();
 	}
+
+	public User findByUsername(String username) {
+		try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+			return session.createQuery("SELECT u FROM User u WHERE u.username = :username", User.class)
+					.setParameter("username", username)
+					.getSingleResult();
+		} catch (Exception e) {
+			logger.error("Hibernate error: ", e);
+		}
+		return null;
+	}
+
+	public User findByEmail(String email) {
+		try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+			return session.createQuery("SELECT u FROM User u WHERE u.email = :email", User.class)
+					.setParameter("email", email)
+					.getSingleResult();
+		} catch (Exception e) {
+			logger.error("Hibernate error: ", e);
+		}
+		return null;
+	}
+
+	public User validateUser(String username, String password) {
+		try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+			return session.createQuery("SELECT u FROM User u WHERE u.username = :username AND u.password = :password", User.class)
+					.setParameter("username", username)
+					.setParameter("password", password)
+					.getSingleResult();
+		} catch (Exception e) {
+			logger.error("Hibernate error: ", e);
+		}
+		return null;
+	}
 }

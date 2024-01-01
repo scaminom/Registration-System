@@ -58,30 +58,30 @@ public class User implements Serializable {
     @Column(name = "fingerprint_pattern")
     private byte[] fingerprintPattern;
 
-	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-	private List<Register> registrations;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private List<Register> registrations;
 
-	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-	private List<Fines> fines;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private List<Fines> fines;
 
-	public User() {
-		registrations = new ArrayList<>();
-		fines = new ArrayList<>();
-	}
+    public User() {
+        registrations = new ArrayList<>();
+        fines = new ArrayList<>();
+    }
 
-	public User(String firstName, String lastName, String username, String password, Role role, String email, String gender, double salaryRecived) {
-		registrations = new ArrayList<>();
-		fines = new ArrayList<>();
-		this.firstName = firstName;
-		this.lastName = lastName;
-		this.username = username;
-		this.password = password;
-		this.role = role;
-		this.email = email;
-		this.gender = gender;
-		this.baseSalary = 800.0;
-		this.salaryRecived = salaryRecived;
-	}
+    public User(String firstName, String lastName, String username, String password, Role role, String email, String gender, double salaryRecived) {
+        registrations = new ArrayList<>();
+        fines = new ArrayList<>();
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.username = username;
+        this.password = password;
+        this.role = role;
+        this.email = email;
+        this.gender = gender;
+        this.baseSalary = 800.0;
+        this.salaryRecived = salaryRecived;
+    }
 
     public Long getId() {
         return id;
@@ -174,35 +174,36 @@ public class User implements Serializable {
     public enum Role {
         ADMIN, EMPLOYEE
     }
-    
+
     @Override
     public String toString() {
         return getFirstName() + " " + getLastName();
     }
-	public List<Register> getRegistrations() {
-		return registrations;
-	}
 
-	public void setRegistrations(List<Register> registrations) {
-		this.registrations = registrations;
-	}
+    public List<Register> getRegistrations() {
+        return registrations;
+    }
 
-	public List<Fines> getFines() {
-		return fines;
-	}
+    public void setRegistrations(List<Register> registrations) {
+        this.registrations = registrations;
+    }
 
-	public void setFines(List<Fines> fines) {
-		this.fines = fines;
-	}
+    public List<Fines> getFines() {
+        return fines;
+    }
 
-	public void addFines(Fines fine) {
-		fines.add(fine);
-		fine.setUser(this);
-	}
+    public void setFines(List<Fines> fines) {
+        this.fines = fines;
+    }
 
-	public void addRegistration(Register registration) {
-		registrations.add(registration);
-		registration.setUser(this);
-	}
+    public void addFines(Fines fine) {
+        fines.add(fine);
+        fine.setUser(this);
+    }
+
+    public void addRegistration(Register registration) {
+        registrations.add(registration);
+        registration.setUser(this);
+    }
 
 }

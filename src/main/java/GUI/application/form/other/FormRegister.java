@@ -1,4 +1,3 @@
-
 package GUI.application.form.other;
 
 import GUI.application.exceptionHandler.ExceptionHandler;
@@ -24,27 +23,26 @@ import org.hibernate.query.Query;
 
 public class FormRegister extends javax.swing.JPanel implements FingerprintCallback {
 
-	private final ExceptionHandler exceptionHandler;
-	private final RegisterDao registerManage;
-	private final UserDao userDao;
-	Long Long = null;
-	private final FinesCalculator finesCalculator;
+    private final ExceptionHandler exceptionHandler;
+    private final RegisterDao registerManage;
+    private final UserDao userDao;
+    Long Long = null;
+    private final FinesCalculator finesCalculator;
     FingerprintManager fingerprintManager = null;
     MyFingerprintCallback callback = null;
 
-	public FormRegister() {
-		initComponents();
-		inicializarHoraLabel();
-		exceptionHandler = new HibernateExceptionHandler();
-		registerManage = new RegisterDao();
-		userDao = new UserDao();
-		finesCalculator = new FinesCalculator();
+    public FormRegister() {
+        initComponents();
+        inicializarHoraLabel();
+        exceptionHandler = new HibernateExceptionHandler();
+        registerManage = new RegisterDao();
+        userDao = new UserDao();
+        finesCalculator = new FinesCalculator();
         fingerprintManager = FingerprintManager.getInstance();
         callback = MyFingerprintCallback.getInstance(btnImg);
         fingerprintManager.addFingerprintCallback(callback);
         fingerprintManager.identify();
-	}
-
+    }
 
     private void inicializarHoraLabel() {
         Timer timer = new Timer(1000, new ActionListener() {
@@ -132,24 +130,24 @@ public class FormRegister extends javax.swing.JPanel implements FingerprintCallb
     @Override
     public void onFingerprintCaptured(byte[] imgBuf) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from
-                                                                       // nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        // nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
     @Override
     public void onFingerprintSuccess(String message) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from
-                                                                       // nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        // nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
     @Override
     public void onFingerprintError(String errorMessage) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from
-                                                                       // nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        // nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
     @Override
     public User onUserIdentify(User user) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from
-                                                                       // nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        // nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 }

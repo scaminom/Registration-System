@@ -23,6 +23,8 @@ public class UserValidator {
 		errors.put("username", new ArrayList<>());
 		errors.put("password", new ArrayList<>());
 		errors.put("email", new ArrayList<>());
+		errors.put("gender", new ArrayList<>());
+		errors.put("role", new ArrayList<>());
 
 		if (user.getFirstName() == null || user.getFirstName().isEmpty()) {
 			errors.get("firstName").add("El nombre es requerido.");
@@ -51,6 +53,14 @@ public class UserValidator {
 			errors.get("email").add("El formato del email no es válido.");
 		}
 
+		if (user.getGender() == null) {
+			errors.get("gender").add("El género es requerido.");
+		}
+
+		if (user.getRole() == null) {
+			errors.get("role").add("El rol es requerido.");
+		}
+
 		errors.entrySet().removeIf(entry -> entry.getValue().isEmpty());
 
 		return errors;
@@ -67,7 +77,9 @@ public class UserValidator {
 	}
 
 	private boolean containsSQLInjectionRisk(String input) {
-		String[] riskyCharacters = {";", "'", "--", "/*", "*/", "@@", "@", "char", "nchar", "varchar", "nvarchar", "alter", "begin", "cast", "create", "cursor", "declare", "delete", "drop", "end", "exec", "execute", "fetch", "insert", "kill", "select", "sys", "sysobjects", "syscolumns", "table", "update"};
+		String[] riskyCharacters = { ";", "'", "--", "/*", "*/", "@@", "@", "char", "nchar", "varchar", "nvarchar",
+				"alter", "begin", "cast", "create", "cursor", "declare", "delete", "drop", "end", "exec", "execute",
+				"fetch", "insert", "kill", "select", "sys", "sysobjects", "syscolumns", "table", "update" };
 		return Arrays.stream(riskyCharacters).anyMatch(input::contains);
 	}
 }

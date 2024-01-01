@@ -1,7 +1,5 @@
 package GUI.application.form.other;
 
-import GUI.application.exceptionHandler.ExceptionHandler;
-import GUI.application.exceptionHandler.HibernateExceptionHandler;
 import GUI.application.exceptionHandler.UserValidator;
 import com.scrum.registrationsystem.dao.UserDao;
 import com.scrum.registrationsystem.entities.User;
@@ -10,141 +8,187 @@ import javax.swing.JOptionPane;
 
 public class FormManage extends javax.swing.JPanel {
 
-	private final ExceptionHandler exceptionHandler;
-	private UserValidator validator;
+    private UserValidator validator;
 
-	private static final String[] COLUMN_NAMES = {"Id", "Nombre", "Apellido", "Usuario", "Contraseña", "Email", "Genero"};
+    private static final String[] COLUMN_NAMES = { "Id", "Nombre", "Apellido", "Usuario", "Contraseña", "Email",
+            "Genero", "Rol" };
 
-	public FormManage() {
-		exceptionHandler = new HibernateExceptionHandler();
-		initComponents();
-		loadDataToTable();
-	}
+    public FormManage() {
+        initComponents();
+        loadDataToTable();
+    }
 
-	public void loadDataToFields() {
-		var manager = new PanelManager(new UserDao());
-		manager.loadDataToFields(jtblEmployee, rowData -> {
-			jtxtName.setText(String.valueOf(rowData[1]));
-			jtxtSurname.setText(String.valueOf(rowData[2]));
-			jtxtUsername.setText(String.valueOf(rowData[3]));
-			jtxtPassword.setText(String.valueOf(rowData[4]));
-			jtxtEmail.setText(String.valueOf(rowData[5]));
+    public void loadDataToFields() {
+        var manager = new PanelManager(new UserDao());
+        manager.loadDataToFields(jtblEmployee, rowData -> {
+            jtxtName.setText(String.valueOf(rowData[1]));
+            jtxtSurname.setText(String.valueOf(rowData[2]));
+            jtxtUsername.setText(String.valueOf(rowData[3]));
+            jtxtPassword.setText(String.valueOf(rowData[4]));
+            jtxtEmail.setText(String.valueOf(rowData[5]));
 
-			String gender = String.valueOf(rowData[6]);
-			if ("Hombre".equals(gender)) {
-				jrdMale.setSelected(true);
-			} else if ("Mujer".equals(gender)) {
-				jrdFemale.setSelected(true);
-			}
-		});
-	}
+            String gender = String.valueOf(rowData[6]);
+            if ("Hombre".equals(gender)) {
+                jrdMale.setSelected(true);
+            } else if ("Mujer".equals(gender)) {
+                jrdFemale.setSelected(true);
+            }
 
-	public void loadDataToTable() {
+            String role = String.valueOf(rowData[7]);
+            if ("Admin".equals(role)) {
+                jrdAdmin.setSelected(true);
+            } else if ("Empleado".equals(role)) {
+                jrdEmploye.setSelected(true);
+            }
+        });
+    }
 
-		var manager = new PanelManager(new UserDao());
-		manager.loadDataToTable(jtblEmployee, (entity, tableModel) -> {
-			var users = entity.stream().map(user -> (User) user).collect(Collectors.toList());
-			for (int i = 0; i < users.size(); i++) {
-				Object[] object = {users.get(i).getId(), users.get(i).getFirstName(), users.get(i).getLastName(), users.get(i).getUsername(), users.get(i).getPassword(), users.get(i).getEmail(), users.get(i).getGender()};
-				tableModel.addRow(object);
-			}
-			tableModel.setColumnIdentifiers(COLUMN_NAMES);
-		});
-	}
+    public void loadDataToTable() {
 
-	public void saveUser() {
-		String firstName = jtxtName.getText();
-		String lastName = jtxtSurname.getText();
-		String username = jtxtUsername.getText();
-		String password = jtxtPassword.getText();
-		String email = jtxtEmail.getText();
-		String gender = jrdMale.isSelected() ? "Hombre" : "Mujer";
-		var role = User.Role.EMPLOYEE;
-		double initialSalary = 800.0;
-		var user = new User(firstName, lastName, username, password, role, email, gender, initialSalary);
-		validator = new UserValidator(user);
-		var errors = validator.validate();
-		if (errors.isEmpty()) {
-			var manager = new PanelManager(new UserDao());
-			manager.insertData(entity -> user);
-			cleanFields();
-			loadDataToTable();
-		} else {
-			errors.forEach((field, errorList) -> {
-				errorList.forEach(error
-						-> JOptionPane.showMessageDialog(null, error, "Error in " + field, JOptionPane.ERROR_MESSAGE));
-			});
-		}
-	}
+        var manager = new PanelManager(new UserDao());
+        manager.loadDataToTable(jtblEmployee, (entity, tableModel) -> {
+            var users = entity.stream().map(user -> (User) user).collect(Collectors.toList());
+            for (int i = 0; i < users.size(); i++) {
+                String role = null;
+                if (users.get(i).getRole() == User.Role.ADMIN) {
+                    role = "Admin";
+                } else if (users.get(i).getRole() == User.Role.EMPLOYEE) {
+                    role = "Empleado";
+                }
+                Object[] object = { users.get(i).getId(), users.get(i).getFirstName(), users.get(i).getLastName(),
+                        users.get(i).getUsername(), users.get(i).getPassword(), users.get(i).getEmail(),
+                        users.get(i).getGender(), role };
+                tableModel.addRow(object);
+            }
+            tableModel.setColumnIdentifiers(COLUMN_NAMES);
+        });
+    }
 
-	public void updateUser() {
-		int row = jtblEmployee.getSelectedRow();
-		if (row != -1) {
-			var user = new User();
-			user.setFirstName(jtxtName.getText());
-			user.setLastName(jtxtSurname.getText());
-			user.setUsername(jtxtUsername.getText());
-			user.setPassword(jtxtPassword.getText());
-			user.setEmail(jtxtEmail.getText());
-			user.setGender(jrdMale.isSelected() ? "Hombre" : "Mujer");
+    public void saveUser() {
+        String firstName = jtxtName.getText();
+        String lastName = jtxtSurname.getText();
+        String username = jtxtUsername.getText();
+        String password = jtxtPassword.getText();
+        String email = jtxtEmail.getText();
+        String gender = null;
+        if (jrdMale.isSelected()) {
+            gender = "Hombre";
+        }
 
-			validator = new UserValidator(user);
-			var errors = validator.validate();
+        if (jrdFemale.isSelected()) {
+            gender = "Mujer";
+        }
 
-			if (errors.isEmpty()) {
-				var manager = new PanelManager(new UserDao());
-				manager.updateData(jtblEmployee, entity -> {
-					var userRecived = (User) entity;
-					userRecived.setFirstName(user.getFirstName());
-					userRecived.setLastName(user.getLastName());
-					userRecived.setUsername(user.getUsername());
-					userRecived.setPassword(user.getPassword());
-					userRecived.setEmail(user.getEmail());
-					userRecived.setGender(user.getGender());
-					return entity;
-				});
+        User.Role role = null;
+        if (jrdAdmin.isSelected()) {
+            role = User.Role.ADMIN;
+        }
 
-				cleanFields();
-				loadDataToTable();
-			} else {
-				errors.forEach((field, errorList) -> {
-					errorList.forEach(error
-							-> JOptionPane.showMessageDialog(null, error, "Error in " + field, JOptionPane.ERROR_MESSAGE));
-				});
-			}
-		} else {
-			JOptionPane.showMessageDialog(null, "Seleccione un usuario.", "Error", JOptionPane.ERROR_MESSAGE);
-		}
-	}
+        if (jrdEmploye.isSelected()) {
+            role = User.Role.EMPLOYEE;
+        }
 
-	public void deleteUser() {
-		int row = jtblEmployee.getSelectedRow();
-		if (row != -1) {
-			var manager = new PanelManager(new UserDao());
-			manager.deleteData(jtblEmployee);
+        double initialSalary = 800.0;
+        var user = new User(firstName, lastName, username, password, role, email, gender, initialSalary);
+        validator = new UserValidator(user);
+        var errors = validator.validate();
+        if (errors.isEmpty()) {
+            var manager = new PanelManager(new UserDao());
+            manager.insertData(entity -> user);
+            cleanFields();
+            loadDataToTable();
+        } else {
+            errors.forEach((field, errorList) -> {
+                errorList.forEach(error -> JOptionPane.showMessageDialog(null, error, "Error in " + field,
+                        JOptionPane.ERROR_MESSAGE));
+            });
+        }
+    }
 
-			loadDataToTable();
-			cleanFields();
-		} else {
-			JOptionPane.showMessageDialog(null, "Seleccione un usuario.", "Error", JOptionPane.ERROR_MESSAGE);
-		}
-	}
+    public void updateUser() {
+        int row = jtblEmployee.getSelectedRow();
+        if (row != -1) {
+            var user = new User();
+            user.setFirstName(jtxtName.getText());
+            user.setLastName(jtxtSurname.getText());
+            user.setUsername(jtxtUsername.getText());
+            user.setPassword(jtxtPassword.getText());
+            user.setEmail(jtxtEmail.getText());
+            if (jrdMale.isSelected()) {
+                user.setGender("Hombre");
+            } else if (jrdFemale.isSelected()) {
+                user.setGender("Mujer");
+            } else {
+                user.setGender(null);
+            }
 
-	public void cleanFields() {
-		jtxtName.setText("");
-		jtxtSurname.setText("");
-		jtxtUsername.setText("");
-		jtxtPassword.setText("");
-		jtxtEmail.setText("");
-		jtblEmployee.clearSelection();
-	}
+            if (jrdAdmin.isSelected()) {
+                user.setRole(User.Role.ADMIN);
+            } else if (jrdEmploye.isSelected()) {
+                user.setRole(User.Role.EMPLOYEE);
+            } else {
+                user.setRole(null);
+            }
 
-	@SuppressWarnings("unchecked")
+            validator = new UserValidator(user);
+            var errors = validator.validate();
+
+            if (errors.isEmpty()) {
+                var manager = new PanelManager(new UserDao());
+                manager.updateData(jtblEmployee, entity -> {
+                    var userRecived = (User) entity;
+                    userRecived.setFirstName(user.getFirstName());
+                    userRecived.setLastName(user.getLastName());
+                    userRecived.setUsername(user.getUsername());
+                    userRecived.setPassword(user.getPassword());
+                    userRecived.setEmail(user.getEmail());
+                    userRecived.setGender(user.getGender());
+                    return entity;
+                });
+
+                cleanFields();
+                loadDataToTable();
+            } else {
+                errors.forEach((field, errorList) -> {
+                    errorList.forEach(error -> JOptionPane.showMessageDialog(null, error, "Error in " + field,
+                            JOptionPane.ERROR_MESSAGE));
+                });
+            }
+        } else {
+            JOptionPane.showMessageDialog(null, "Seleccione un usuario.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    public void deleteUser() {
+        int row = jtblEmployee.getSelectedRow();
+        if (row != -1) {
+            var manager = new PanelManager(new UserDao());
+            manager.deleteData(jtblEmployee);
+
+            loadDataToTable();
+            cleanFields();
+        } else {
+            JOptionPane.showMessageDialog(null, "Seleccione un usuario.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    public void cleanFields() {
+        jtxtName.setText("");
+        jtxtSurname.setText("");
+        jtxtUsername.setText("");
+        jtxtPassword.setText("");
+        jtxtEmail.setText("");
+        jtblEmployee.clearSelection();
+    }
+
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Generated
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
         java.awt.GridBagConstraints gridBagConstraints;
 
         jbtgGender = new javax.swing.ButtonGroup();
+        jbtgRol = new javax.swing.ButtonGroup();
         jPanel1 = new javax.swing.JPanel();
         jlbName = new javax.swing.JLabel();
         jlbSurname = new javax.swing.JLabel();
@@ -159,6 +203,9 @@ public class FormManage extends javax.swing.JPanel {
         jrdFemale = new javax.swing.JRadioButton();
         jlbEmail = new javax.swing.JLabel();
         jtxtEmail = new javax.swing.JTextField();
+        jlbRol = new javax.swing.JLabel();
+        jrdEmploye = new javax.swing.JRadioButton();
+        jrdAdmin = new javax.swing.JRadioButton();
         jPanel2 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         jtblEmployee = new javax.swing.JTable();
@@ -167,7 +214,6 @@ public class FormManage extends javax.swing.JPanel {
         jbtnEdit = new javax.swing.JButton();
         jbtnDelete = new javax.swing.JButton();
         jbtnClean = new javax.swing.JButton();
-        jbtnReport = new javax.swing.JButton();
 
         jPanel1.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
 
@@ -189,49 +235,59 @@ public class FormManage extends javax.swing.JPanel {
 
         jlbEmail.setText("Email:");
 
+        jlbRol.setText("Rol:");
+
+        jbtgRol.add(jrdEmploye);
+        jrdEmploye.setText("Empleado");
+
+        jbtgRol.add(jrdAdmin);
+        jrdAdmin.setText("Admin");
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(28, 28, 28)
-                .addComponent(jlbName, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(34, 34, 34)
-                .addComponent(jtxtName, javax.swing.GroupLayout.PREFERRED_SIZE, 157, javax.swing.GroupLayout.PREFERRED_SIZE))
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(28, 28, 28)
-                .addComponent(jlbSurname, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(34, 34, 34)
-                .addComponent(jtxtSurname, javax.swing.GroupLayout.PREFERRED_SIZE, 157, javax.swing.GroupLayout.PREFERRED_SIZE))
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(28, 28, 28)
-                .addComponent(jlbUsername, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(34, 34, 34)
-                .addComponent(jtxtUsername, javax.swing.GroupLayout.PREFERRED_SIZE, 157, javax.swing.GroupLayout.PREFERRED_SIZE))
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(28, 28, 28)
-                .addComponent(jlbGender, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(34, 34, 34)
-                .addComponent(jrdMale))
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(144, 144, 144)
-                .addComponent(jrdFemale))
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(28, 28, 28)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                .addGap(14, 14, 14)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jlbEmail, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jlbName, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(34, 34, 34)
-                        .addComponent(jtxtEmail, javax.swing.GroupLayout.PREFERRED_SIZE, 157, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(jtxtName, javax.swing.GroupLayout.PREFERRED_SIZE, 157, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jlbPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jlbSurname, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(34, 34, 34)
-                        .addComponent(jtxtPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 157, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                        .addComponent(jtxtSurname, javax.swing.GroupLayout.PREFERRED_SIZE, 157, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jlbUsername, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(34, 34, 34)
+                        .addComponent(jtxtUsername, javax.swing.GroupLayout.PREFERRED_SIZE, 157, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jlbGender, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(34, 34, 34)
+                        .addComponent(jrdMale))
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                        .addGroup(jPanel1Layout.createSequentialGroup()
+                            .addComponent(jlbEmail, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGap(34, 34, 34)
+                            .addComponent(jtxtEmail, javax.swing.GroupLayout.PREFERRED_SIZE, 157, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(jPanel1Layout.createSequentialGroup()
+                            .addComponent(jlbPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGap(34, 34, 34)
+                            .addComponent(jtxtPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 157, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jlbRol)
+                        .addGap(96, 96, 96)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jrdEmploye)
+                            .addComponent(jrdFemale)
+                            .addComponent(jrdAdmin))))
+                .addContainerGap(14, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(25, 25, 25)
+                .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGap(3, 3, 3)
@@ -269,7 +325,13 @@ public class FormManage extends javax.swing.JPanel {
                     .addComponent(jrdMale))
                 .addGap(6, 6, 6)
                 .addComponent(jrdFemale)
-                .addContainerGap(14, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jlbRol)
+                    .addComponent(jrdEmploye))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jrdAdmin)
+                .addContainerGap(8, Short.MAX_VALUE))
         );
 
         jPanel2.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
@@ -278,13 +340,13 @@ public class FormManage extends javax.swing.JPanel {
         jtblEmployee.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED, java.awt.Color.lightGray, java.awt.Color.lightGray, java.awt.Color.lightGray, java.awt.Color.lightGray));
         jtblEmployee.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null}
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null}
             },
             new String [] {
-                "Title 1", "Title 2", "Title 3", "Title 4", "Title 5", "Title 6", "Title 7"
+                "Title 1", "Title 2", "Title 3", "Title 4", "Title 5", "Title 6", "Title 7", "Title 8"
             }
         ));
         jtblEmployee.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
@@ -357,14 +419,6 @@ public class FormManage extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(17, 130, 57, 126);
         jPanel3.add(jbtnClean, gridBagConstraints);
 
-        jbtnReport.setText("Generar Reporte");
-        jbtnReport.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jbtnReportActionPerformed(evt);
-            }
-        });
-        jPanel3.add(jbtnReport, new java.awt.GridBagConstraints());
-
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -382,32 +436,29 @@ public class FormManage extends javax.swing.JPanel {
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, 243, Short.MAX_VALUE))
+                .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, 258, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jbtnSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbtnSaveActionPerformed
-		saveUser();
-    }//GEN-LAST:event_jbtnSaveActionPerformed
+    private void jbtnSaveActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_jbtnSaveActionPerformed
+        saveUser();
+    }// GEN-LAST:event_jbtnSaveActionPerformed
 
-    private void jbtnDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbtnDeleteActionPerformed
-		deleteUser();
-    }//GEN-LAST:event_jbtnDeleteActionPerformed
+    private void jbtnDeleteActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_jbtnDeleteActionPerformed
+        deleteUser();
+    }// GEN-LAST:event_jbtnDeleteActionPerformed
 
-    private void jbtnEditActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbtnEditActionPerformed
-		updateUser();
-    }//GEN-LAST:event_jbtnEditActionPerformed
+    private void jbtnEditActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_jbtnEditActionPerformed
+        updateUser();
+    }// GEN-LAST:event_jbtnEditActionPerformed
 
-    private void jbtnCleanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbtnCleanActionPerformed
-		cleanFields();
-    }//GEN-LAST:event_jbtnCleanActionPerformed
+    private void jbtnCleanActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_jbtnCleanActionPerformed
+        cleanFields();
+    }// GEN-LAST:event_jbtnCleanActionPerformed
 
-    private void jtblEmployeeMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jtblEmployeeMouseClicked
-		loadDataToFields();
-    }//GEN-LAST:event_jtblEmployeeMouseClicked
-
-    private void jbtnReportActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbtnReportActionPerformed
-    }//GEN-LAST:event_jbtnReportActionPerformed
+    private void jtblEmployeeMouseClicked(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_jtblEmployeeMouseClicked
+        loadDataToFields();
+    }// GEN-LAST:event_jtblEmployeeMouseClicked
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel jPanel1;
@@ -415,17 +466,20 @@ public class FormManage extends javax.swing.JPanel {
     private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.ButtonGroup jbtgGender;
+    private javax.swing.ButtonGroup jbtgRol;
     private javax.swing.JButton jbtnClean;
     private javax.swing.JButton jbtnDelete;
     private javax.swing.JButton jbtnEdit;
-    private javax.swing.JButton jbtnReport;
     private javax.swing.JButton jbtnSave;
     private javax.swing.JLabel jlbEmail;
     private javax.swing.JLabel jlbGender;
     private javax.swing.JLabel jlbName;
     private javax.swing.JLabel jlbPassword;
+    private javax.swing.JLabel jlbRol;
     private javax.swing.JLabel jlbSurname;
     private javax.swing.JLabel jlbUsername;
+    private javax.swing.JRadioButton jrdAdmin;
+    private javax.swing.JRadioButton jrdEmploye;
     private javax.swing.JRadioButton jrdFemale;
     private javax.swing.JRadioButton jrdMale;
     private javax.swing.JTable jtblEmployee;
