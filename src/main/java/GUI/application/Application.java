@@ -24,20 +24,20 @@ import javax.swing.UIManager;
 public class Application extends javax.swing.JFrame {
 
     private static Application app;
-    private final MainForm mainForm;
+    private static MainForm mainForm;
     private final LoginForm loginForm;
     private FormRegister formRegister;
     private final Home home;
     private final UserDao userDao;
     FingerprintManager fingerprintManager = null;
     MyFingerprintCallback callback = null;
-    private User userLogged = null;
+    private static User userLogged = null;
 
     public Application() {
         initComponents();
         setSize(new Dimension(1366, 768));
         setLocationRelativeTo(null);
-        mainForm = new MainForm();
+        
         loginForm = new LoginForm();
         formRegister = new FormRegister();
         userDao = new UserDao();
@@ -73,13 +73,14 @@ public class Application extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(null, "Usuario o contraseña incorrectos", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
-        app.setUserLogged(user);
+        setUserLogged(user);
+        mainForm = new MainForm();
         FlatAnimatedLafChange.showSnapshot();
-        app.setContentPane(app.mainForm);
-        app.mainForm.applyComponentOrientation(app.getComponentOrientation());
+        app.setContentPane(mainForm);
+        mainForm.applyComponentOrientation(app.getComponentOrientation());
         setSelectedMenu(0, 0);
-        app.mainForm.hideMenu();
-        SwingUtilities.updateComponentTreeUI(app.mainForm);
+        mainForm.hideMenu();
+        SwingUtilities.updateComponentTreeUI(mainForm);
         FlatAnimatedLafChange.hideSnapshotWithAnimation();
     }
 
@@ -89,7 +90,7 @@ public class Application extends javax.swing.JFrame {
         app.loginForm.applyComponentOrientation(app.getComponentOrientation());
         SwingUtilities.updateComponentTreeUI(app.loginForm);
         FlatAnimatedLafChange.hideSnapshotWithAnimation();
-        app.setUserLogged(null);
+        setUserLogged(null);
     }
 
     public static void setSelectedMenu(int index, int subIndex) {
@@ -98,12 +99,12 @@ public class Application extends javax.swing.JFrame {
 
     
 
-    public User getUserLogged() {
+    public static User getUserLogged() {
         return userLogged;
     }
 
-    public void setUserLogged(User userLogged) {
-        this.userLogged = userLogged;
+    public static void setUserLogged(User userLogged) {
+        Application.userLogged = userLogged;
     }
 
     @SuppressWarnings("unchecked")

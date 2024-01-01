@@ -12,6 +12,8 @@ import GUI.menu.MenuAction;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.formdev.flatlaf.util.UIScale;
+import com.scrum.registrationsystem.entities.User;
+
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.ComponentOrientation;
@@ -26,6 +28,8 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
 public class MainForm extends JLayeredPane {
+
+    private User user = Application.getUserLogged();
 
     public MainForm() {
         init();
@@ -68,31 +72,39 @@ public class MainForm extends JLayeredPane {
 
     private void initMenuEvent() {
         menu.addMenuEvent((int index, int subIndex, MenuAction action) -> {
-            if (index == 0) {
-                Application.showForm(new FormDashboard());
-            } else if (index == 1) {
-                if (subIndex == 1) {
-                    Application.showForm(new FormManage());
-                } else if (subIndex == 2) {
-                    Application.showForm(new FormFingerprint());
+            if (user.getRole().equals(User.Role.ADMIN)) {
+                if (index == 0) {
+                    Application.showForm(new FormDashboard());
+                } else if (index == 1) {
+                    if (subIndex == 1) {
+                        Application.showForm(new FormManage());
+                    } else if (subIndex == 2) {
+                        Application.showForm(new FormFingerprint());
+                    }
+                } else if (index == 2) {
+                    Application.showForm(new FormFines());
+                } else if (index == 3) {
+                    if (subIndex == 1) {
+                        Application.showForm(new FormRegistrationsReports());
+                    } else if (subIndex == 2) {
+                        Application.showForm(new FormRegistrationsSalary());
+                    }
+                } else if (index == 4) {
+                    Application.logout();
+                } else {
+                    action.cancel();
                 }
-            } else if (index == 2) {
-                Application.showForm(new FormFines());
-            } else if (index == 3) {
-                if (subIndex == 1) {
-                    Application.showForm(new FormRegistrationsReports());
-                } else if (subIndex == 2) {
-                    Application.showForm(new FormRegistrationsSalary());
-                }
-            } else if (index == 4) {
-                Application.logout();
             } else {
-                action.cancel();
+                if (index == 0) {
+                    Application.showForm(new FormDashboard());
+                } else if (index == 1) {
+                    Application.logout();
+                } else {
+                    action.cancel();
+                }
             }
         });
     }
-
-    
 
     private void setMenuFull(boolean full) {
         String icon;

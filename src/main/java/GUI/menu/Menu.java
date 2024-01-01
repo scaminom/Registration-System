@@ -1,10 +1,12 @@
 package GUI.menu;
 
+import GUI.application.Application;
 import GUI.menu.mode.LightDarkMode;
 import GUI.menu.mode.ToolBarAccentColor;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.ui.FlatUIUtils;
 import com.formdev.flatlaf.util.UIScale;
+import com.scrum.registrationsystem.entities.User;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -20,248 +22,254 @@ import javax.swing.JScrollPane;
 
 public class Menu extends JPanel {
 
-	private final String menuItems[][] = {
-			{ "~MAIN~" },
-			{ "Dashboard" },
-			{ "~REGISTRO DE EMPLEADOS~" },
-			{ "Empleado", "Administrar", "Añadir huella" },
-			{ "Multas" },
-			{ "Reportes", "Registros", "Sueldos" },
-			{ "Logout" }
-	};
+    private User user = Application.getUserLogged();
 
-	public boolean isMenuFull() {
-		return menuFull;
-	}
+    private final String menuItems[][] = user.getRole().equals(User.Role.ADMIN) ? new String[][]{
+        {"~MAIN~"},
+        {"Dashboard"},
+        {"~REGISTRO DE EMPLEADOS~"},
+        {"Empleado", "Administrar", "Añadir huella"},
+        {"Multas"},
+        {"Reportes", "Registros", "Sueldos"},
+        {"Logout"}
+    } : new String[][]{
+        {"~MAIN~"},
+        {"Dashboard"},
+        {"Logout"}
+    };
 
-	public void setMenuFull(boolean menuFull) {
-		this.menuFull = menuFull;
-		if (menuFull) {
-			header.setText(headerName);
-			header.setHorizontalAlignment(getComponentOrientation().isLeftToRight() ? JLabel.LEFT : JLabel.RIGHT);
-		} else {
-			header.setText("");
-			header.setHorizontalAlignment(JLabel.CENTER);
-		}
-		for (Component com : panelMenu.getComponents()) {
-			if (com instanceof MenuItem) {
-				((MenuItem) com).setFull(menuFull);
-			}
-		}
-		lightDarkMode.setMenuFull(menuFull);
-		toolBarAccentColor.setMenuFull(menuFull);
-	}
+    public boolean isMenuFull() {
+        return menuFull;
+    }
 
-	private final List<MenuEvent> events = new ArrayList<>();
-	private boolean menuFull = true;
-	private final String headerName = "Scrum Team";
+    public void setMenuFull(boolean menuFull) {
+        this.menuFull = menuFull;
+        if (menuFull) {
+            header.setText(headerName);
+            header.setHorizontalAlignment(getComponentOrientation().isLeftToRight() ? JLabel.LEFT : JLabel.RIGHT);
+        } else {
+            header.setText("");
+            header.setHorizontalAlignment(JLabel.CENTER);
+        }
+        for (Component com : panelMenu.getComponents()) {
+            if (com instanceof MenuItem) {
+                ((MenuItem) com).setFull(menuFull);
+            }
+        }
+        lightDarkMode.setMenuFull(menuFull);
+        toolBarAccentColor.setMenuFull(menuFull);
+    }
 
-	protected final boolean hideMenuTitleOnMinimum = true;
-	protected final int menuTitleLeftInset = 5;
-	protected final int menuTitleVgap = 5;
-	protected final int menuMaxWidth = 250;
-	protected final int menuMinWidth = 60;
-	protected final int headerFullHgap = 5;
+    private final List<MenuEvent> events = new ArrayList<>();
+    private boolean menuFull = true;
+    private final String headerName = "Scrum Team";
 
-	public Menu() {
-		init();
-	}
+    protected final boolean hideMenuTitleOnMinimum = true;
+    protected final int menuTitleLeftInset = 5;
+    protected final int menuTitleVgap = 5;
+    protected final int menuMaxWidth = 250;
+    protected final int menuMinWidth = 60;
+    protected final int headerFullHgap = 5;
 
-	private void init() {
-		setLayout(new MenuLayout());
-		putClientProperty(FlatClientProperties.STYLE, ""
-				+ "border:20,2,2,2;"
-				+ "background:$Menu.background;"
-				+ "arc:10");
-		header = new JLabel(headerName);
-		header.setIcon(new ImageIcon(getClass().getResource("/GUI/icon/png/logo.png")));
-		header.putClientProperty(FlatClientProperties.STYLE, ""
-				+ "font:$Menu.header.font;"
-				+ "foreground:$Menu.foreground");
+    public Menu() {
+        init();
+    }
 
-		// Menu
-		scroll = new JScrollPane();
-		panelMenu = new JPanel(new MenuItemLayout(this));
-		panelMenu.putClientProperty(FlatClientProperties.STYLE, ""
-				+ "border:5,5,5,5;"
-				+ "background:$Menu.background");
+    private void init() {
+        setLayout(new MenuLayout());
+        putClientProperty(FlatClientProperties.STYLE, ""
+                + "border:20,2,2,2;"
+                + "background:$Menu.background;"
+                + "arc:10");
+        header = new JLabel(headerName);
+        header.setIcon(new ImageIcon(getClass().getResource("/GUI/icon/png/logo.png")));
+        header.putClientProperty(FlatClientProperties.STYLE, ""
+                + "font:$Menu.header.font;"
+                + "foreground:$Menu.foreground");
 
-		scroll.setViewportView(panelMenu);
-		scroll.putClientProperty(FlatClientProperties.STYLE, ""
-				+ "border:null");
-		JScrollBar vscroll = scroll.getVerticalScrollBar();
-		vscroll.setUnitIncrement(10);
-		vscroll.putClientProperty(FlatClientProperties.STYLE, ""
-				+ "width:$Menu.scroll.width;"
-				+ "trackInsets:$Menu.scroll.trackInsets;"
-				+ "thumbInsets:$Menu.scroll.thumbInsets;"
-				+ "background:$Menu.ScrollBar.background;"
-				+ "thumb:$Menu.ScrollBar.thumb");
-		createMenu();
-		lightDarkMode = new LightDarkMode();
-		toolBarAccentColor = new ToolBarAccentColor(this);
-		toolBarAccentColor.setVisible(FlatUIUtils.getUIBoolean("AccentControl.show", false));
-		add(header);
-		add(scroll);
-		add(lightDarkMode);
-		add(toolBarAccentColor);
-	}
+        // Menu
+        scroll = new JScrollPane();
+        panelMenu = new JPanel(new MenuItemLayout(this));
+        panelMenu.putClientProperty(FlatClientProperties.STYLE, ""
+                + "border:5,5,5,5;"
+                + "background:$Menu.background");
 
-	private void createMenu() {
-		int index = 0;
-		for (int i = 0; i < menuItems.length; i++) {
-			String menuName = menuItems[i][0];
-			if (menuName.startsWith("~") && menuName.endsWith("~")) {
-				panelMenu.add(createTitle(menuName));
-			} else {
-				MenuItem menuItem = new MenuItem(this, menuItems[i], index++, events);
-				panelMenu.add(menuItem);
-			}
-		}
-	}
+        scroll.setViewportView(panelMenu);
+        scroll.putClientProperty(FlatClientProperties.STYLE, ""
+                + "border:null");
+        JScrollBar vscroll = scroll.getVerticalScrollBar();
+        vscroll.setUnitIncrement(10);
+        vscroll.putClientProperty(FlatClientProperties.STYLE, ""
+                + "width:$Menu.scroll.width;"
+                + "trackInsets:$Menu.scroll.trackInsets;"
+                + "thumbInsets:$Menu.scroll.thumbInsets;"
+                + "background:$Menu.ScrollBar.background;"
+                + "thumb:$Menu.ScrollBar.thumb");
+        createMenu();
+        lightDarkMode = new LightDarkMode();
+        toolBarAccentColor = new ToolBarAccentColor(this);
+        toolBarAccentColor.setVisible(FlatUIUtils.getUIBoolean("AccentControl.show", false));
+        add(header);
+        add(scroll);
+        add(lightDarkMode);
+        add(toolBarAccentColor);
+    }
 
-	private JLabel createTitle(String title) {
-		String menuName = title.substring(1, title.length() - 1);
-		JLabel lbTitle = new JLabel(menuName);
-		lbTitle.putClientProperty(FlatClientProperties.STYLE, ""
-				+ "font:$Menu.label.font;"
-				+ "foreground:$Menu.title.foreground");
-		return lbTitle;
-	}
+    private void createMenu() {
+        int index = 0;
+        for (int i = 0; i < menuItems.length; i++) {
+            String menuName = menuItems[i][0];
+            if (menuName.startsWith("~") && menuName.endsWith("~")) {
+                panelMenu.add(createTitle(menuName));
+            } else {
+                MenuItem menuItem = new MenuItem(this, menuItems[i], index++, events);
+                panelMenu.add(menuItem);
+            }
+        }
+    }
 
-	public void setSelectedMenu(int index, int subIndex) {
-		runEvent(index, subIndex);
-	}
+    private JLabel createTitle(String title) {
+        String menuName = title.substring(1, title.length() - 1);
+        JLabel lbTitle = new JLabel(menuName);
+        lbTitle.putClientProperty(FlatClientProperties.STYLE, ""
+                + "font:$Menu.label.font;"
+                + "foreground:$Menu.title.foreground");
+        return lbTitle;
+    }
 
-	protected void setSelected(int index, int subIndex) {
-		int size = panelMenu.getComponentCount();
-		for (int i = 0; i < size; i++) {
-			Component com = panelMenu.getComponent(i);
-			if (com instanceof MenuItem) {
-				MenuItem item = (MenuItem) com;
-				if (item.getMenuIndex() == index) {
-					item.setSelectedIndex(subIndex);
-				} else {
-					item.setSelectedIndex(-1);
-				}
-			}
-		}
-	}
+    public void setSelectedMenu(int index, int subIndex) {
+        runEvent(index, subIndex);
+    }
 
-	protected void runEvent(int index, int subIndex) {
-		MenuAction menuAction = new MenuAction();
-		for (MenuEvent event : events) {
-			event.menuSelected(index, subIndex, menuAction);
-		}
-		if (!menuAction.isCancel()) {
-			setSelected(index, subIndex);
-		}
-	}
+    protected void setSelected(int index, int subIndex) {
+        int size = panelMenu.getComponentCount();
+        for (int i = 0; i < size; i++) {
+            Component com = panelMenu.getComponent(i);
+            if (com instanceof MenuItem) {
+                MenuItem item = (MenuItem) com;
+                if (item.getMenuIndex() == index) {
+                    item.setSelectedIndex(subIndex);
+                } else {
+                    item.setSelectedIndex(-1);
+                }
+            }
+        }
+    }
 
-	public void addMenuEvent(MenuEvent event) {
-		events.add(event);
-	}
+    protected void runEvent(int index, int subIndex) {
+        MenuAction menuAction = new MenuAction();
+        for (MenuEvent event : events) {
+            event.menuSelected(index, subIndex, menuAction);
+        }
+        if (!menuAction.isCancel()) {
+            setSelected(index, subIndex);
+        }
+    }
 
-	public void hideMenuItem() {
-		for (Component com : panelMenu.getComponents()) {
-			if (com instanceof MenuItem) {
-				((MenuItem) com).hideMenuItem();
-			}
-		}
-		revalidate();
-	}
+    public void addMenuEvent(MenuEvent event) {
+        events.add(event);
+    }
 
-	public boolean isHideMenuTitleOnMinimum() {
-		return hideMenuTitleOnMinimum;
-	}
+    public void hideMenuItem() {
+        for (Component com : panelMenu.getComponents()) {
+            if (com instanceof MenuItem) {
+                ((MenuItem) com).hideMenuItem();
+            }
+        }
+        revalidate();
+    }
 
-	public int getMenuTitleLeftInset() {
-		return menuTitleLeftInset;
-	}
+    public boolean isHideMenuTitleOnMinimum() {
+        return hideMenuTitleOnMinimum;
+    }
 
-	public int getMenuTitleVgap() {
-		return menuTitleVgap;
-	}
+    public int getMenuTitleLeftInset() {
+        return menuTitleLeftInset;
+    }
 
-	public int getMenuMaxWidth() {
-		return menuMaxWidth;
-	}
+    public int getMenuTitleVgap() {
+        return menuTitleVgap;
+    }
 
-	public int getMenuMinWidth() {
-		return menuMinWidth;
-	}
+    public int getMenuMaxWidth() {
+        return menuMaxWidth;
+    }
 
-	private JLabel header;
-	private JScrollPane scroll;
-	private JPanel panelMenu;
-	private LightDarkMode lightDarkMode;
-	private ToolBarAccentColor toolBarAccentColor;
+    public int getMenuMinWidth() {
+        return menuMinWidth;
+    }
 
-	private class MenuLayout implements LayoutManager {
+    private JLabel header;
+    private JScrollPane scroll;
+    private JPanel panelMenu;
+    private LightDarkMode lightDarkMode;
+    private ToolBarAccentColor toolBarAccentColor;
 
-		@Override
-		public void addLayoutComponent(String name, Component comp) {
-		}
+    private class MenuLayout implements LayoutManager {
 
-		@Override
-		public void removeLayoutComponent(Component comp) {
-		}
+        @Override
+        public void addLayoutComponent(String name, Component comp) {
+        }
 
-		@Override
-		public Dimension preferredLayoutSize(Container parent) {
-			synchronized (parent.getTreeLock()) {
-				return new Dimension(5, 5);
-			}
-		}
+        @Override
+        public void removeLayoutComponent(Component comp) {
+        }
 
-		@Override
-		public Dimension minimumLayoutSize(Container parent) {
-			synchronized (parent.getTreeLock()) {
-				return new Dimension(0, 0);
-			}
-		}
+        @Override
+        public Dimension preferredLayoutSize(Container parent) {
+            synchronized (parent.getTreeLock()) {
+                return new Dimension(5, 5);
+            }
+        }
 
-		@Override
-		public void layoutContainer(Container parent) {
-			synchronized (parent.getTreeLock()) {
-				Insets insets = parent.getInsets();
-				int x = insets.left;
-				int y = insets.top;
-				int gap = UIScale.scale(5);
-				int sheaderFullHgap = UIScale.scale(headerFullHgap);
-				int width = parent.getWidth() - (insets.left + insets.right);
-				int height = parent.getHeight() - (insets.top + insets.bottom);
-				int iconWidth = width;
-				int iconHeight = header.getPreferredSize().height;
-				int hgap = menuFull ? sheaderFullHgap : 0;
-				int accentColorHeight = 0;
-				if (toolBarAccentColor.isVisible()) {
-					accentColorHeight = toolBarAccentColor.getPreferredSize().height + gap;
-				}
+        @Override
+        public Dimension minimumLayoutSize(Container parent) {
+            synchronized (parent.getTreeLock()) {
+                return new Dimension(0, 0);
+            }
+        }
 
-				header.setBounds(x + hgap, y, iconWidth - (hgap * 2), iconHeight);
-				int ldgap = UIScale.scale(10);
-				int ldWidth = width - ldgap * 2;
-				int ldHeight = lightDarkMode.getPreferredSize().height;
-				int ldx = x + ldgap;
-				int ldy = y + height - ldHeight - ldgap - accentColorHeight;
+        @Override
+        public void layoutContainer(Container parent) {
+            synchronized (parent.getTreeLock()) {
+                Insets insets = parent.getInsets();
+                int x = insets.left;
+                int y = insets.top;
+                int gap = UIScale.scale(5);
+                int sheaderFullHgap = UIScale.scale(headerFullHgap);
+                int width = parent.getWidth() - (insets.left + insets.right);
+                int height = parent.getHeight() - (insets.top + insets.bottom);
+                int iconWidth = width;
+                int iconHeight = header.getPreferredSize().height;
+                int hgap = menuFull ? sheaderFullHgap : 0;
+                int accentColorHeight = 0;
+                if (toolBarAccentColor.isVisible()) {
+                    accentColorHeight = toolBarAccentColor.getPreferredSize().height + gap;
+                }
 
-				int menux = x;
-				int menuy = y + iconHeight + gap;
-				int menuWidth = width;
-				int menuHeight = height - (iconHeight + gap) - (ldHeight + ldgap * 2) - (accentColorHeight);
-				scroll.setBounds(menux, menuy, menuWidth, menuHeight);
+                header.setBounds(x + hgap, y, iconWidth - (hgap * 2), iconHeight);
+                int ldgap = UIScale.scale(10);
+                int ldWidth = width - ldgap * 2;
+                int ldHeight = lightDarkMode.getPreferredSize().height;
+                int ldx = x + ldgap;
+                int ldy = y + height - ldHeight - ldgap - accentColorHeight;
 
-				lightDarkMode.setBounds(ldx, ldy, ldWidth, ldHeight);
+                int menux = x;
+                int menuy = y + iconHeight + gap;
+                int menuWidth = width;
+                int menuHeight = height - (iconHeight + gap) - (ldHeight + ldgap * 2) - (accentColorHeight);
+                scroll.setBounds(menux, menuy, menuWidth, menuHeight);
 
-				if (toolBarAccentColor.isVisible()) {
-					int tbheight = toolBarAccentColor.getPreferredSize().height;
-					int tbwidth = Math.min(toolBarAccentColor.getPreferredSize().width, ldWidth);
-					int tby = y + height - tbheight - ldgap;
-					int tbx = ldx + ((ldWidth - tbwidth) / 2);
-					toolBarAccentColor.setBounds(tbx, tby, tbwidth, tbheight);
-				}
-			}
-		}
-	}
+                lightDarkMode.setBounds(ldx, ldy, ldWidth, ldHeight);
+
+                if (toolBarAccentColor.isVisible()) {
+                    int tbheight = toolBarAccentColor.getPreferredSize().height;
+                    int tbwidth = Math.min(toolBarAccentColor.getPreferredSize().width, ldWidth);
+                    int tby = y + height - tbheight - ldgap;
+                    int tbx = ldx + ((ldWidth - tbwidth) / 2);
+                    toolBarAccentColor.setBounds(tbx, tby, tbwidth, tbheight);
+                }
+            }
+        }
+    }
 }
