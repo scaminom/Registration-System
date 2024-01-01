@@ -68,4 +68,15 @@ public class FinesDAO {
             throw e;
         }
     }
+
+    public Fines findTodayLastMultaByUser(Long id) throws HibernateException {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            return session.createQuery("from Fines where user_id = :id order by id desc", Fines.class)
+                    .setParameter("id", id)
+                    .setMaxResults(1)
+                    .uniqueResult();
+        } catch (HibernateException e) {
+            throw e;
+        }
+    }
 }

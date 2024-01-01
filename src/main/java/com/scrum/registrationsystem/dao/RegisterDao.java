@@ -6,6 +6,7 @@ import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
+import java.time.LocalDate;
 import java.util.List;
 import org.hibernate.query.Query;
 
@@ -117,17 +118,22 @@ public class RegisterDao {
     }
 
     public Register findLastRecordByUser(Long userId) throws HibernateException {
-        if (userId == null) {
-            throw new IllegalArgumentException("User ID must not be null.");
-        }
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            Query<Register> query = session.createQuery(
-                    "FROM Register WHERE user.id = :userId ORDER BY id DESC", Register.class);
-            query.setParameter("userId", userId);
-            query.setMaxResults(1);
-            return query.uniqueResult();
-        } catch (HibernateException e) {
-            throw e;
-        }
+    if (userId == null) {
+        throw new IllegalArgumentException("User ID must not be null.");
     }
+    try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+        LocalDate today = LocalDate.now(); // Obtén la fecha de hoy
+
+        // Modifica la consulta para filtrar registros por la fecha de hoy
+        Query<Register> query = session.createQuery(
+                "FROM Register WHERE user.id = :userId AND date(entryTime) = :today ORDER BY id DESC", Register.class);
+        query.setParameter("userId", userId);
+        query.setParameter("today", today);
+        query.setMaxResults(1);
+        
+        return query.uniqueResult();
+    } catch (HibernateException e) {
+        throw e;
+    }
+}
 }

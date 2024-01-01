@@ -39,7 +39,6 @@ public class Application extends javax.swing.JFrame {
         setLocationRelativeTo(null);
         
         loginForm = new LoginForm();
-        formRegister = new FormRegister();
         userDao = new UserDao();
         home = new Home();
         setContentPane(home);
@@ -50,7 +49,7 @@ public class Application extends javax.swing.JFrame {
 
     public static void showForm(Component component) {
         component.applyComponentOrientation(app.getComponentOrientation());
-        app.mainForm.showForm(component);
+        mainForm.showForm(component);
     }
 
     public static void attendanceRecorder() {
@@ -94,7 +93,7 @@ public class Application extends javax.swing.JFrame {
     }
 
     public static void setSelectedMenu(int index, int subIndex) {
-        app.mainForm.setSelectedMenu(index, subIndex);
+        mainForm.setSelectedMenu(index, subIndex);
     }
 
     

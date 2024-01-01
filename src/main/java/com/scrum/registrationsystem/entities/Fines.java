@@ -1,5 +1,7 @@
 package com.scrum.registrationsystem.entities;
 
+import java.sql.Date;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -20,6 +22,9 @@ public class Fines {
 	@ManyToOne
 	@JoinColumn(name = "id_user", nullable = false)
 	private User user;
+
+	@Column(name = "date", nullable = false)
+	private Date date;
 
 	@Column(name = "description", nullable = false)
 	private String description;
