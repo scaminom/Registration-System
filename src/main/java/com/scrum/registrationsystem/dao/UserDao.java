@@ -190,4 +190,23 @@ public class UserDao extends Repository<User> {
 		}
 		return null;
 	}
+
+	public void decreaseSalary(User user, double amount) {
+		Transaction transaction = null;
+		try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+			transaction = session.beginTransaction();
+			user.setSalaryRecived(user.getSalaryRecived() - amount);
+			session.update(user);
+			transaction.commit();
+		} catch (Exception e) {
+			if (transaction != null) {
+				try {
+					transaction.rollback();
+				} catch (RuntimeException re) {
+					logger.error("Rollback error: ", re);
+				}
+			}
+			logger.error("Hibernate error: ", e);
+		}
+	}
 }

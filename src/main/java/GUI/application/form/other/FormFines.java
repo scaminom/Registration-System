@@ -9,13 +9,15 @@ import GUI.application.exceptionHandler.HibernateExceptionHandler;
 import com.scrum.registrationsystem.entities.Fines;
 import javax.swing.table.DefaultTableModel;
 import com.scrum.registrationsystem.dao.FinesDAO;
+
 /**
  *
  * @author acuri
  */
 public class FormFines extends javax.swing.JPanel {
+
     private final FinesDAO finesManage;
-    private static final String[] COLUMN_NAMES = {"id", "Cd. Empleado", "Descripcion", "Valor"};
+    private static final String[] COLUMN_NAMES = {"id", "Empleado", "Descripcion", "Valor", "Fecha"};
     private final ExceptionHandler exceptionHandler;
 
     /**
@@ -29,17 +31,17 @@ public class FormFines extends javax.swing.JPanel {
     }
 
     private void chargeTable() {
-	DefaultTableModel model = new DefaultTableModel(COLUMN_NAMES, 0);
-	try {
+        DefaultTableModel model = new DefaultTableModel(COLUMN_NAMES, 0);
+        try {
             var fines = finesManage.getMultas();
             for (Fines fine : fines) {
-		model.addRow(new Object[]{fine.getId(), fine.getUser().getFirstName() + " " + fine.getUser().getLastName(), fine.getDescripcion(), fine.getValorMulta()});
+                model.addRow(new Object[]{fine.getId(), fine.getUser().getFirstName() + " " + fine.getUser().getLastName(), fine.getDescripcion(), fine.getValorMulta(), fine.getDate()});
             }
-	} catch (Exception e) {
+        } catch (Exception e) {
             exceptionHandler.handleException(e);
-	}
-            jtblFines.setModel(model);
-	}
+        }
+        jtblFines.setModel(model);
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -56,17 +58,27 @@ public class FormFines extends javax.swing.JPanel {
 
         jtblFines.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
+                {null, null, null, null, null},
+                {null, null, null, null, null},
+                {null, null, null, null, null},
+                {null, null, null, null, null}
             },
             new String [] {
-                "Title 1", "Title 2", "Title 3", "Title 4"
+                "Title 1", "Title 2", "Title 3", "Title 4", "Title 5"
             }
-        ));
+        ) {
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false, false
+            };
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
         jScrollPane1.setViewportView(jtblFines);
 
+        jLabel1.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel1.setText("Multas");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
@@ -74,18 +86,14 @@ public class FormFines extends javax.swing.JPanel {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 623, Short.MAX_VALUE)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jLabel1)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addGap(0, 15, Short.MAX_VALUE)
                 .addComponent(jLabel1)
-                .addGap(18, 18, 18)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(24, 24, 24)
+                .addComponent(jScrollPane1))
         );
     }// </editor-fold>//GEN-END:initComponents
 

@@ -18,8 +18,6 @@ import com.scrum.registrationsystem.entities.User;
 
 import GUI.application.exceptionHandler.ExceptionHandler;
 import GUI.application.exceptionHandler.HibernateExceptionHandler;
-import java.util.HashSet;
-import java.util.Set;
 
 public class FinesCalculator {
 
@@ -28,7 +26,7 @@ public class FinesCalculator {
 	private final TimeService timeService;
 	private final ExceptionHandler exceptionHandler;
 	private final UserDao userDao;
-	private static boolean isCalculated = false;
+	private static boolean isCalculated;
 
 	public FinesCalculator() {
 		this.registerDao = new RegisterDao();
@@ -36,6 +34,7 @@ public class FinesCalculator {
 		this.timeService = new TimeService();
 		this.exceptionHandler = new HibernateExceptionHandler();
 		this.userDao = new UserDao();
+		isCalculated = finesDAO.isTodayMulta(timeService.getCurrentDateTime().toLocalDate());
 	}
 
 	public void calculateAndStoreFines() {
@@ -73,7 +72,7 @@ public class FinesCalculator {
 			for (Map.Entry<User, List<Register>> entry : registersByUser.entrySet()) {
 				User user = entry.getKey();
 				List<Register> userRegisters = entry.getValue();
-				
+
 				// Eliminar usuarios que no tenga registros de la lista users por el id
 				users.removeIf(u -> u.getId().equals(user.getId()));
 
@@ -100,9 +99,9 @@ public class FinesCalculator {
 				Fines multa = new Fines(user,
 						"Multa por no trabajar: " + calculateMinutos(hoursWorkedMorning, hoursWorkedAfternoon)
 								+ " minutos",
-						fine, new Date(now.toLocalDate().toEpochDay()));
+						fine, Date.valueOf(today));
 				finesDAO.saveMulta(multa);
-				;
+				userDao.decreaseSalary(user, fine);
 
 			}
 
@@ -110,8 +109,9 @@ public class FinesCalculator {
 			// registros
 			for (User user : users) {
 				Fines multa = new Fines(user, "Multa por ausencia", 8 * 60 * 0.25,
-						new Date(now.toLocalDate().toEpochDay()));
+						Date.valueOf(today));
 				finesDAO.saveMulta(multa);
+				userDao.decreaseSalary(user, 8 * 60 * 0.25);
 			}
 
 			isCalculated = true;

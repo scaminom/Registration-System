@@ -5,6 +5,8 @@ import com.scrum.registrationsystem.util.HibernateUtil;
 
 import java.time.LocalDate;
 import java.util.List;
+
+import org.checkerframework.checker.units.qual.t;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -21,25 +23,25 @@ public class FinesDAO {
     }
 
     // Método para guardar una multa
-   public void saveMulta(Fines multa) throws HibernateException {
-    Session session = null;
-    Transaction transaction = null;
-    try {
-        session = HibernateUtil.getSessionFactory().openSession();
-        transaction = session.beginTransaction();
-        session.save(multa);
-        transaction.commit();
-    } catch (HibernateException e) {
-        if (transaction != null) {
-            transaction.rollback();
-        }
-        throw e;
-    } finally {
-        if (session != null) {
-            session.close();
+    public void saveMulta(Fines multa) throws HibernateException {
+        Session session = null;
+        Transaction transaction = null;
+        try {
+            session = HibernateUtil.getSessionFactory().openSession();
+            transaction = session.beginTransaction();
+            session.save(multa);
+            transaction.commit();
+        } catch (HibernateException e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            throw e;
+        } finally {
+            if (session != null) {
+                session.close();
+            }
         }
     }
-}
 
     // Método para actualizar una multa
     public void updateMulta(Fines multa) throws HibernateException {
@@ -83,16 +85,27 @@ public class FinesDAO {
     }
 
     public Fines findTodayLastMultaByUser(Long id) throws HibernateException {
-    LocalDate today = LocalDate.now(); 
-    try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-        return session.createQuery("from Fines where user_id = :id AND date = :today order by id desc", Fines.class)
-                .setParameter("id", id)
-                .setParameter("today", today)
-                .setMaxResults(1)
-                .uniqueResult();
-    } catch (HibernateException e) {
-        throw e;
+        LocalDate today = LocalDate.now();
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            return session.createQuery("from Fines where user_id = :id AND date = :today order by id desc", Fines.class)
+                    .setParameter("id", id)
+                    .setParameter("today", today)
+                    .setMaxResults(1)
+                    .uniqueResult();
+        } catch (HibernateException e) {
+            throw e;
+        }
     }
-}
+
+    public boolean isTodayMulta(LocalDate today) throws HibernateException {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            return session.createQuery("from Fines where date = :today", Fines.class)
+                    .setParameter("today", today)
+                    .setMaxResults(1)
+                    .uniqueResult() != null;
+        } catch (HibernateException e) {
+            throw e;
+        }
+    }
 
 }

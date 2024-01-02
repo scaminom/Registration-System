@@ -2,8 +2,6 @@ package com.scrum.registrationsystem.entities;
 
 import java.sql.Date;
 
-import com.scrum.registrationsystem.service.TimeService;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -17,63 +15,71 @@ import jakarta.persistence.Table;
 @Table(name = "Fines")
 public class Fines {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-	@ManyToOne
-	@JoinColumn(name = "id_user", nullable = false)
-	private User user;
+    @ManyToOne
+    @JoinColumn(name = "id_user", nullable = false)
+    private User user;
 
-	@Column(name = "date", nullable = false)
-	private Date date;
+    @Column(name = "date", nullable = false)
+    private Date date;
 
-	@Column(name = "description", nullable = false)
-	private String description;
+    @Column(name = "description", nullable = false)
+    private String description;
 
-	@Column(name = "cost_fine", nullable = false)
-	private double costFine;
+    @Column(name = "cost_fine", nullable = false)
+    private double costFine;
 
-	public Fines() {
-	}
+    public Fines() {
+    }
 
-	public Fines(User user, String description, double constFine, Date date) {
-		this.user = user;
-		this.description = description;
-		this.costFine = constFine;
-		this.date = date;
-	}
+    public Fines(User user, String description, double constFine, Date date) {
+        this.user = user;
+        this.description = description;
+        this.costFine = constFine;
+        this.date = date;
+    }
 
-	public Long getId() {
-		return id;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public User getUser() {
-		return user;
-	}
+    public User getUser() {
+        return user;
+    }
 
-	public void setUser(User user) {
-		this.user = user;
-	}
+    public void setUser(User user) {
+        this.user = user;
+    }
 
-	public String getDescripcion() {
-		return description;
-	}
+    public String getDescripcion() {
+        return description;
+    }
 
-	public void setDescripcion(String description) {
-		this.description = description;
-	}
+    public void setDescripcion(String description) {
+        this.description = description;
+    }
 
-	public double getValorMulta() {
-		return costFine;
-	}
+    public double getValorMulta() {
+        return costFine;
+    }
 
-	public void setValorMulta(double costFine) {
-		this.costFine = costFine;
-	}
+    public void setValorMulta(double costFine) {
+        this.costFine = costFine;
+    }
+
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
+    }
 
 }
