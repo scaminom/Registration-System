@@ -25,8 +25,6 @@ public class Menu extends JPanel {
     private User user = Application.getUserLogged();
 
     private final String menuItems[][] = user.getRole().equals(User.Role.ADMIN) ? new String[][]{
-        {"~MAIN~"},
-        {"Dashboard"},
         {"~REGISTRO DE EMPLEADOS~"},
         {"Empleado", "Administrar", "Añadir huella"},
         {"Multas"},
@@ -34,7 +32,7 @@ public class Menu extends JPanel {
         {"Logout"}
     } : new String[][]{
         {"~MAIN~"},
-        {"Dashboard"},
+        {"Mis Registros"},
         {"Logout"}
     };
 

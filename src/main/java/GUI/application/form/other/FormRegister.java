@@ -7,19 +7,13 @@ import com.scrum.registrationsystem.biometrics.FingerprintManager;
 import com.scrum.registrationsystem.biometrics.MyFingerprintCallback;
 import com.scrum.registrationsystem.dao.RegisterDao;
 import com.scrum.registrationsystem.dao.UserDao;
-import com.scrum.registrationsystem.entities.Register;
 import com.scrum.registrationsystem.entities.User;
 import com.scrum.registrationsystem.service.FinesCalculator;
-import com.scrum.registrationsystem.util.HibernateUtil;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
 import java.util.Date;
-import javax.swing.JOptionPane;
 import javax.swing.Timer;
-import org.hibernate.Session;
-import org.hibernate.query.Query;
 
 public class FormRegister extends javax.swing.JPanel implements FingerprintCallback {
 

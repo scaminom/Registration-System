@@ -134,5 +134,18 @@ public class RegisterDao {
             throw e;
         }
     }
+    
+    public List<Register> findAllRegistersByUser(Long userId) throws HibernateException {
+        if (userId == null) {
+            throw new IllegalArgumentException("User ID must not be null.");
+        }
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            return session.createQuery("from Register where user.id = :userId", Register.class)
+                    .setParameter("userId", userId)
+                    .list();
+        } catch (HibernateException e) {
+            throw e;
+        }
+    }
 
 }

@@ -13,6 +13,7 @@ import com.scrum.registrationsystem.biometrics.MyFingerprintCallback;
 import com.scrum.registrationsystem.dao.UserDao;
 import com.scrum.registrationsystem.entities.User;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -175,6 +176,10 @@ public class FormFingerprint extends javax.swing.JPanel {
                                 userSelected.setFingerprintPattern(fingerprintManager.getTemplate());
                                 ud.updateUserFingerprint(userSelected, fingerprintManager.getTemplate());
                                 fingerprintManager.saveUserFootprints();
+                                JOptionPane.showMessageDialog(null, "Huella guardada correctamente", "Success",
+                                                JOptionPane.INFORMATION_MESSAGE);
+                                fingerprintManager.clearTemplate();
+                                jbtnImg.setIcon(null);
 
                         } else {
                                 StringBuilder errorBuilder = new StringBuilder();
@@ -184,6 +189,7 @@ public class FormFingerprint extends javax.swing.JPanel {
                                         });
                                 });
                                 String error = errorBuilder.toString();
+                                JOptionPane.showMessageDialog(null, error, "Error", JOptionPane.ERROR_MESSAGE);
                         }
                 } catch (Exception e) {
                         exceptionHandler.handleException(e);

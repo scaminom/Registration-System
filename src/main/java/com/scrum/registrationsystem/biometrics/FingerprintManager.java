@@ -12,6 +12,7 @@ import com.zkteco.biometric.FingerprintSensorEx;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class FingerprintManager {
@@ -143,6 +144,10 @@ public class FingerprintManager {
         if (!bIdentify) {
             bIdentify = true;
         }
+    }
+
+    public void clearTemplate() {
+        Arrays.fill(template, (byte) 0);
     }
 
     public void FreeSensor() {

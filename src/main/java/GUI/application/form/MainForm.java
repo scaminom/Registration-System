@@ -5,6 +5,7 @@ import GUI.application.form.other.FormDashboard;
 import GUI.application.form.other.FormFingerprint;
 import GUI.application.form.other.FormFines;
 import GUI.application.form.other.FormManage;
+import GUI.application.form.other.FormMyRegisters;
 import GUI.application.form.other.FormRegistrationsReports;
 import GUI.application.form.other.FormRegistrationsSalary;
 import GUI.menu.Menu;
@@ -74,29 +75,27 @@ public class MainForm extends JLayeredPane {
         menu.addMenuEvent((int index, int subIndex, MenuAction action) -> {
             if (user.getRole().equals(User.Role.ADMIN)) {
                 if (index == 0) {
-                    Application.showForm(new FormDashboard());
-                } else if (index == 1) {
                     if (subIndex == 1) {
                         Application.showForm(new FormManage());
                     } else if (subIndex == 2) {
                         Application.showForm(new FormFingerprint());
                     }
-                } else if (index == 2) {
+                } else if (index == 1) {
                     Application.showForm(new FormFines());
-                } else if (index == 3) {
+                } else if (index == 2) {
                     if (subIndex == 1) {
                         Application.showForm(new FormRegistrationsReports());
                     } else if (subIndex == 2) {
                         Application.showForm(new FormRegistrationsSalary());
                     }
-                } else if (index == 4) {
+                } else if (index == 3) {
                     Application.logout();
                 } else {
                     action.cancel();
                 }
             } else {
                 if (index == 0) {
-                    Application.showForm(new FormDashboard());
+                    Application.showForm(new FormMyRegisters());
                 } else if (index == 1) {
                     Application.logout();
                 } else {
