@@ -45,6 +45,7 @@ public class MyFingerprintCallback implements FingerprintCallback {
     private final RegisterDao registerDao = new RegisterDao();
     private final FinesDAO finesDAO = new FinesDAO();
     TimeService timeService = new TimeService();
+    private boolean isFines = false;
 
     public MyFingerprintCallback(JButton btnImage) {
         this.btnImg = btnImage;
@@ -114,8 +115,9 @@ public class MyFingerprintCallback implements FingerprintCallback {
             }
 
             // Calcular y almacenar multas
-            if (isEndTime) {
+            if (isEndTime && isFines) {
                 calculateAndStoreFines();
+                isFines = true;
             }
         } catch (Exception e) {
             exceptionHandler.handleException(e);
@@ -180,7 +182,7 @@ public class MyFingerprintCallback implements FingerprintCallback {
         for (Register register : registers) {
             LocalTime entryTime = register.getEntryTime() != null ? register.getEntryTime().toLocalTime()
                     : LocalTime.MIN;
-            LocalTime exitTime = register.getExitTime() != null ? register.getExitTime().toLocalTime() : currentTime;
+            LocalTime exitTime = register.getExitTime() != null ? register.getExitTime().toLocalTime() : LocalTime.of(17, 0);
 
             // Ajustar tiempos para que estén dentro del intervalo
             entryTime = entryTime.isBefore(intervalStart) ? intervalStart : entryTime;
