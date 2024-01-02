@@ -4,10 +4,7 @@
  */
 package com.scrum.registrationsystem.biometrics;
 
-import com.scrum.registrationsystem.dao.FinesDAO;
 import com.scrum.registrationsystem.dao.RegisterDao;
-import com.scrum.registrationsystem.dao.UserDao;
-import com.scrum.registrationsystem.entities.Fines;
 import com.scrum.registrationsystem.entities.Register;
 import com.scrum.registrationsystem.entities.User;
 import com.scrum.registrationsystem.service.TimeService;
@@ -17,16 +14,10 @@ import GUI.application.exceptionHandler.HibernateExceptionHandler;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.Date;
-import java.time.Duration;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.List;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
@@ -43,14 +34,12 @@ public class MyFingerprintCallback implements FingerprintCallback {
     private final RegisterDao registerManage;
     private final ExceptionHandler exceptionHandler;
     private final RegisterDao registerDao = new RegisterDao();
-    private final FinesDAO finesDAO = new FinesDAO();
     TimeService timeService = new TimeService();
-    private boolean isFines = false;
 
     public MyFingerprintCallback(JButton btnImage) {
         this.btnImg = btnImage;
-        registerManage = new RegisterDao();
-        exceptionHandler = new HibernateExceptionHandler();
+        this.registerManage = new RegisterDao();
+        this.exceptionHandler = new HibernateExceptionHandler();
     }
 
     public MyFingerprintCallback() {
@@ -93,10 +82,11 @@ public class MyFingerprintCallback implements FingerprintCallback {
             // Determinar si es hora de entrada
             boolean isMorningEntryTime = now.isAfter(morningStartTime) && now.isBefore(morningEndTime);
             boolean isAfternoonEntryTime = now.isAfter(afternoonStartTime);
+            boolean isMorningEndTime = now.isBefore(afternoonEndTime);
             boolean isEndTime = now.isBefore(afternoonEndTime);
 
             if (register == null || (register.getEntryTime() != null && register.getExitTime() != null)) {
-                if (isMorningEntryTime || isAfternoonEntryTime) {
+                if (isMorningEntryTime && isMorningEndTime  || isAfternoonEntryTime && isEndTime) {
                     // Registro de entrada
                     Register newRegister = new Register(now, null, user);
                     user.addRegistration(newRegister);
@@ -115,107 +105,10 @@ public class MyFingerprintCallback implements FingerprintCallback {
             }
 
             // Calcular y almacenar multas
-            if (isEndTime && isFines) {
-                calculateAndStoreFines();
-                isFines = true;
-            }
         } catch (Exception e) {
             exceptionHandler.handleException(e);
         }
         return user;
-    }
-
-    private void calculateAndStoreFines() {
-        try {
-            LocalDateTime now = timeService.getCurrentDateTime();
-            LocalDate today = now.toLocalDate();
-
-            // Definir las horas de inicio y fin de las jornadas laborales
-            LocalTime workMorningStart = LocalTime.of(8, 0);
-            LocalTime workMorningEnd = LocalTime.of(13, 0);
-            LocalTime workAfternoonStart = LocalTime.of(14, 0);
-            LocalTime workAfternoonEnd = LocalTime.of(17, 0);
-
-            // Obtener los registros de hoy
-            List<Register> registers = registerDao.findAllRegistersByDate(today);
-
-            // Agrupar registros por usuario
-            Map<User, List<Register>> registersByUser = registers.stream()
-                    .collect(Collectors.groupingBy(Register::getUser));
-
-            for (Map.Entry<User, List<Register>> entry : registersByUser.entrySet()) {
-                User user = entry.getKey();
-                List<Register> userRegisters = entry.getValue();
-
-                // Verificar si hay registros para el día
-                if (userRegisters.isEmpty()) {
-                    // Aplicar multa por día completo de ausencia
-                    Fines multa = new Fines(user, "Multa por ausencia", 8 * 60 * 0.25,
-                            new Date(now.toLocalDate().toEpochDay()));
-                    finesDAO.saveMulta(multa);
-                    continue;
-                }
-
-                // Calcular las horas trabajadas en los intervalos definidos
-                double hoursWorkedMorning = calculateHoursWorkedInInterval(userRegisters, workMorningStart,
-                        workMorningEnd, now.toLocalTime());
-                double hoursWorkedAfternoon = calculateHoursWorkedInInterval(userRegisters, workAfternoonStart,
-                        workAfternoonEnd, now.toLocalTime());
-
-                // Calcular la multa
-                double fine = calculateFine(hoursWorkedMorning, hoursWorkedAfternoon);
-                Fines multa = new Fines(user, "Multa por ausencia", fine, new Date(now.toLocalDate().toEpochDay()));
-                finesDAO.saveMulta(multa);
-                ;
-
-            }
-
-        } catch (Exception e) {
-            exceptionHandler.handleException(e);
-        }
-    }
-
-    private double calculateHoursWorkedInInterval(List<Register> registers, LocalTime intervalStart,
-            LocalTime intervalEnd, LocalTime currentTime) {
-        double totalHours = 0.0;
-
-        for (Register register : registers) {
-            LocalTime entryTime = register.getEntryTime() != null ? register.getEntryTime().toLocalTime()
-                    : LocalTime.MIN;
-            LocalTime exitTime = register.getExitTime() != null ? register.getExitTime().toLocalTime() : LocalTime.of(17, 0);
-
-            // Ajustar tiempos para que estén dentro del intervalo
-            entryTime = entryTime.isBefore(intervalStart) ? intervalStart : entryTime;
-            exitTime = exitTime.isAfter(intervalEnd) ? intervalEnd : exitTime;
-
-            // Calcular duración si el registro está dentro del intervalo
-            if (!entryTime.isAfter(intervalEnd) && !exitTime.isBefore(intervalStart)) {
-                long minutesWorked = Duration.between(entryTime, exitTime).toMinutes();
-                totalHours += minutesWorked / 60.0;
-            }
-        }
-
-        return totalHours;
-    }
-
-    private double calculateFine(double hoursWorkedMorning, double hoursWorkedAfternoon) {
-        // Horas totales de trabajo esperadas
-        double expectedWorkingHours = 8.0;
-
-        // Horas totales trabajadas
-        double totalHoursWorked = hoursWorkedMorning + hoursWorkedAfternoon;
-
-        // Calcular la diferencia en minutos
-        double differenceInMinutes = (expectedWorkingHours - totalHoursWorked) * 60;
-
-        // Tasa de multa por minuto
-        double fineRatePerMinute = 0.25;
-
-        // Calcular la multa
-        double fine = differenceInMinutes * fineRatePerMinute;
-
-        // Asegurarse de que la multa no sea negativa
-        return Math.max(fine, 0);
     }
 
     private static MyFingerprintCallback instance;

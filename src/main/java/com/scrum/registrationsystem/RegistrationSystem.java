@@ -43,14 +43,6 @@ public class RegistrationSystem {
 		user.setSalaryRecived(user.getBaseSalary());
 		user.setRole(User.Role.EMPLOYEE);
 		userdao.create(user);
-
-		System.out.println("User id= " + user.getId());
-		LocalDateTime horaEntrada = LocalDateTime.of(2023, 12, 30, 8, 0);
-		LocalDateTime horaSalida = LocalDateTime.of(2023, 12, 30, 13, 0);
-
-		finesCalculator.procesarMultaEntrada(user.getId(), horaEntrada);
-		finesCalculator.procesarMultaSalida(user.getId(), horaSalida);
-		System.out.println("Usuario: " + user.getUsername());
-		System.out.println("Salario recibido después de multas: " + user.getSalaryRecived());
+                
 	}
 }

@@ -1,144 +1,172 @@
 package com.scrum.registrationsystem.service;
 
+import java.sql.Date;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import com.scrum.registrationsystem.dao.FinesDAO;
 import com.scrum.registrationsystem.dao.RegisterDao;
 import com.scrum.registrationsystem.dao.UserDao;
 import com.scrum.registrationsystem.entities.Fines;
 import com.scrum.registrationsystem.entities.Register;
 import com.scrum.registrationsystem.entities.User;
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
+
+import GUI.application.exceptionHandler.ExceptionHandler;
+import GUI.application.exceptionHandler.HibernateExceptionHandler;
+import java.util.HashSet;
+import java.util.Set;
 
 public class FinesCalculator {
 
-	private final FinesDAO finesManage;
-	private final UserDao userManage;
 	private final RegisterDao registerDao;
-	private static final double MULTA_POR_MINUTO = 0.25;
-	private static final int HORA_INICIO_JORNADA_MATUTINA = 8;
-	private static final int HORA_FIN_JORNADA_MATUTINA = 13;
-	private static final int HORA_INICIO_JORNADA_VESPERTINA = 14;
-	private static final int HORA_FIN_JORNADA_VESPERTINA = 17;
-	private static final int MINUTOS_JORNADA_COMPLETA = 480;
+	private final FinesDAO finesDAO;
+	private final TimeService timeService;
+	private final ExceptionHandler exceptionHandler;
+	private final UserDao userDao;
+	private static boolean isCalculated = false;
 
 	public FinesCalculator() {
-		finesManage = new FinesDAO();
-		userManage = new UserDao();
-		registerDao = new RegisterDao();
+		this.registerDao = new RegisterDao();
+		this.finesDAO = new FinesDAO();
+		this.timeService = new TimeService();
+		this.exceptionHandler = new HibernateExceptionHandler();
+		this.userDao = new UserDao();
 	}
 
-	public double calcularMulta(Long userId, LocalDateTime hora, boolean esEntrada) {
-		Register ultimoRegistro = null;
-		if (esEntrada && hora.getHour() >= HORA_INICIO_JORNADA_VESPERTINA) {
-			if (ultimoRegistro == null || ultimoRegistro.getEntryTime().getHour() >= HORA_INICIO_JORNADA_VESPERTINA) {
-				return 300 * MULTA_POR_MINUTO;
-			}
-		}
-		if (!esEntrada && (ultimoRegistro != null && ultimoRegistro.getExitTime() == null)) {
-			if (ultimoRegistro.getEntryTime().getHour() < HORA_INICIO_JORNADA_VESPERTINA && hora.getHour() >= HORA_FIN_JORNADA_VESPERTINA) {
-				return (HORA_FIN_JORNADA_VESPERTINA - HORA_INICIO_JORNADA_VESPERTINA) * 60 * MULTA_POR_MINUTO;
-			}
-		}
-		if (esEntrada && hora.getHour() >= HORA_FIN_JORNADA_VESPERTINA) {
-			return MINUTOS_JORNADA_COMPLETA * MULTA_POR_MINUTO;
-		}
+	public void calculateAndStoreFines() {
 
-		if (ultimoRegistro == null) {
-			return calcularMultaBasica(hora, esEntrada);
-		}
-
-		boolean yaRegistradoMatutina = ultimoRegistro.getEntryTime().getHour() < HORA_FIN_JORNADA_MATUTINA;
-		boolean yaRegistradoVespertina = ultimoRegistro.getEntryTime().getHour() >= HORA_INICIO_JORNADA_VESPERTINA;
-
-		if (esEntrada) {
-			if (yaRegistradoMatutina && hora.getHour() >= HORA_INICIO_JORNADA_VESPERTINA) {
-				return calcularMultaDesdeHasta(hora, HORA_INICIO_JORNADA_VESPERTINA, HORA_FIN_JORNADA_VESPERTINA);
-			}
-			return calcularMultaBasica(hora, true);
-		} else {
-			if (yaRegistradoVespertina) {
-				return 0;
-			}
-			return calcularMultaBasica(hora, false);
-		}
-	}
-
-	private double calcularMultaBasica(LocalDateTime hora, boolean esEntrada) {
-		int horaInicio;
-		int horaFin;
-
-		if (esEntrada) {
-			if (hora.getHour() >= HORA_INICIO_JORNADA_VESPERTINA) {
-				horaInicio = HORA_INICIO_JORNADA_VESPERTINA;
-				horaFin = HORA_FIN_JORNADA_VESPERTINA;
-			} else {
-				horaInicio = HORA_INICIO_JORNADA_MATUTINA;
-				horaFin = HORA_FIN_JORNADA_MATUTINA;
+		try {
+			LocalDateTime now = timeService.getCurrentDateTime();
+			if (isCalculated) {
+				return;
 			}
 
-			long minutosDiferencia = ChronoUnit.MINUTES.between(LocalDateTime.of(hora.toLocalDate(), hora.toLocalTime().withHour(horaInicio).withMinute(0)), hora);
-			return (minutosDiferencia > 0) ? minutosDiferencia * MULTA_POR_MINUTO : 0;
-		} else {
-			horaInicio = (hora.getHour() < HORA_INICIO_JORNADA_VESPERTINA) ? HORA_INICIO_JORNADA_MATUTINA : HORA_INICIO_JORNADA_VESPERTINA;
-			horaFin = (hora.getHour() < HORA_INICIO_JORNADA_VESPERTINA) ? HORA_FIN_JORNADA_MATUTINA : HORA_FIN_JORNADA_VESPERTINA;
+			if (now.toLocalTime().isBefore(LocalTime.of(17, 0))) {
+				return;
+			}
 
-			long minutosDiferencia = ChronoUnit.MINUTES.between(hora, LocalDateTime.of(hora.toLocalDate(), hora.toLocalTime().withHour(horaFin).withMinute(0)));
-			return (minutosDiferencia > 0) ? minutosDiferencia * MULTA_POR_MINUTO : 0;
+			System.out.println("Calculando multas");
+
+			LocalDate today = now.toLocalDate();
+
+			// Definir las horas de inicio y fin de las jornadas laborales
+			LocalTime workMorningStart = LocalTime.of(8, 0);
+			LocalTime workMorningEnd = LocalTime.of(13, 0);
+			LocalTime workAfternoonStart = LocalTime.of(14, 0);
+			LocalTime workAfternoonEnd = LocalTime.of(17, 0);
+
+			// Obtener los registros de hoy
+			List<Register> registers = registerDao.findAllRegistersByDate(today);
+
+			// Obtener los usuarios
+			List<User> users = userDao.findAll();
+
+			// Agrupar registros por usuario
+			Map<User, List<Register>> registersByUser = registers.stream()
+					.collect(Collectors.groupingBy(Register::getUser));
+
+			for (Map.Entry<User, List<Register>> entry : registersByUser.entrySet()) {
+				User user = entry.getKey();
+				List<Register> userRegisters = entry.getValue();
+				
+				// Eliminar usuarios que no tenga registros de la lista users por el id
+				users.removeIf(u -> u.getId().equals(user.getId()));
+
+				// Verificar si hay registros para el día
+				if (userRegisters.isEmpty()) {
+					// Aplicar multa por día completo de ausencia
+					Fines multa = new Fines(user, "Multa por ausencia", 8 * 60 * 0.25,
+							new Date(now.toLocalDate().toEpochDay()));
+					finesDAO.saveMulta(multa);
+					continue;
+				}
+
+				// Calcular las horas trabajadas en los intervalos definidos
+				double hoursWorkedMorning = calculateHoursWorkedInInterval(userRegisters, workMorningStart,
+						workMorningEnd, now.toLocalTime());
+				double hoursWorkedAfternoon = calculateHoursWorkedInInterval(userRegisters, workAfternoonStart,
+						workAfternoonEnd, now.toLocalTime());
+
+				// Calcular la multa
+				double fine = calculateFine(hoursWorkedMorning, hoursWorkedAfternoon);
+				if (fine == 0) {
+					continue;
+				}
+				Fines multa = new Fines(user,
+						"Multa por no trabajar: " + calculateMinutos(hoursWorkedMorning, hoursWorkedAfternoon)
+								+ " minutos",
+						fine, new Date(now.toLocalDate().toEpochDay()));
+				finesDAO.saveMulta(multa);
+				;
+
+			}
+
+			// Aplicar multa por día completo de ausencia a los usuarios que no tengan
+			// registros
+			for (User user : users) {
+				Fines multa = new Fines(user, "Multa por ausencia", 8 * 60 * 0.25,
+						new Date(now.toLocalDate().toEpochDay()));
+				finesDAO.saveMulta(multa);
+			}
+
+			isCalculated = true;
+
+		} catch (Exception e) {
+			exceptionHandler.handleException(e);
 		}
 	}
 
-	private double calcularMultaDesdeHasta(LocalDateTime hora, int horaInicio, int horaFin) {
-		long minutosDiferencia = ChronoUnit.MINUTES.between(LocalDateTime.of(hora.toLocalDate(), hora.toLocalTime().withHour(horaInicio).withMinute(0)), LocalDateTime.of(hora.toLocalDate(), hora.toLocalTime().withHour(horaFin).withMinute(0)));
-		if (minutosDiferencia < 0) {
-			return 0;
+	private double calculateHoursWorkedInInterval(List<Register> registers, LocalTime intervalStart,
+			LocalTime intervalEnd, LocalTime currentTime) {
+		double totalHours = 0.0;
+
+		for (Register register : registers) {
+			LocalTime entryTime = register.getEntryTime() != null ? register.getEntryTime().toLocalTime()
+					: LocalTime.MIN;
+			LocalTime exitTime = register.getExitTime() != null ? register.getExitTime().toLocalTime()
+					: LocalTime.of(17, 0);
+
+			// Ajustar tiempos para que estén dentro del intervalo
+			entryTime = entryTime.isBefore(intervalStart) ? intervalStart : entryTime;
+			exitTime = exitTime.isAfter(intervalEnd) ? intervalEnd : exitTime;
+
+			// Calcular duración si el registro está dentro del intervalo
+			if (!entryTime.isAfter(intervalEnd) && !exitTime.isBefore(intervalStart)) {
+				long minutesWorked = Duration.between(entryTime, exitTime).toMinutes();
+				totalHours += minutesWorked / 60.0;
+			}
 		}
-		return minutosDiferencia * MULTA_POR_MINUTO;
+
+		return totalHours;
 	}
 
-	public Fines procesarMultaEntrada(Long idEmpleado, LocalDateTime horaEntrada) {
-		double multaTotal = calcularMulta(idEmpleado, horaEntrada, true);
-		User user = null;
-		if (multaTotal > 0) {
-			user = userManage.findById(idEmpleado);
-			Fines multa = new Fines();
-			multa.setUser(user);
-			multa.setDescripcion("Multa por entrada tardía");
-			multa.setValorMulta(multaTotal);
-			finesManage.saveMulta(multa);
+	private double calculateFine(double hoursWorkedMorning, double hoursWorkedAfternoon) {
+		// Tasa de multa por minuto
+		double fineRatePerMinute = 0.25;
 
-			actualizarSalarioUsuario(user, multaTotal);
-			return multa;
-		}
-		return null;
+		// Calcular la multa
+		double fine = calculateMinutos(hoursWorkedMorning, hoursWorkedAfternoon) * fineRatePerMinute;
+
+		// Asegurarse de que la multa no sea negativa
+		return Math.max(fine, 0);
 	}
 
-	public Fines procesarMultaSalida(Long idEmpleado, LocalDateTime horaSalida) {
-		double multaSalida = calcularMulta(idEmpleado, horaSalida, false);
-		User user = null;
-		if (multaSalida > 0) {
-			user = userManage.findById(idEmpleado);
-			Fines multa = new Fines();
-			multa.setUser(user);
-			multa.setDescripcion("Multa por salida temprana");
-			multa.setValorMulta(multaSalida);
-			finesManage.saveMulta(multa);
+	private double calculateMinutos(double hoursWorkedMorning, double hoursWorkedAfternoon) {
+		// Horas totales de trabajo esperadas
+		double expectedWorkingHours = 8.0;
 
-			actualizarSalarioUsuario(user, multaSalida);
-			return multa;
-		}
-		return null;
-	}
+		// Horas totales trabajadas
+		double totalHoursWorked = hoursWorkedMorning + hoursWorkedAfternoon;
 
-	private void actualizarSalarioUsuario(User user, double ajusteSalario) {
-		double salarioActual = user.getSalaryRecived();
-		user.setId(user.getId());
-		user.setFirstName(user.getFirstName());
-		user.setLastName(user.getLastName());
-		user.setUsername(user.getUsername());
-		user.setPassword(user.getPassword());
-		user.setEmail(user.getEmail());
-		user.setRole(user.getRole());
-		user.setSalaryRecived(Math.max(0, salarioActual - ajusteSalario));
-		userManage.update(user);
+		// Calcular la diferencia en minutos
+		double differenceInMinutes = (expectedWorkingHours - totalHoursWorked) * 60;
+
+		return differenceInMinutes;
+
 	}
 }

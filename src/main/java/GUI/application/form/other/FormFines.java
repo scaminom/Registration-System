@@ -33,7 +33,7 @@ public class FormFines extends javax.swing.JPanel {
 	try {
             var fines = finesManage.getMultas();
             for (Fines fine : fines) {
-		model.addRow(new Object[]{fine.getId(), fine.getUser().getId(), fine.getDescripcion(), fine.getValorMulta()});
+		model.addRow(new Object[]{fine.getId(), fine.getUser().getFirstName() + " " + fine.getUser().getLastName(), fine.getDescripcion(), fine.getValorMulta()});
             }
 	} catch (Exception e) {
             exceptionHandler.handleException(e);

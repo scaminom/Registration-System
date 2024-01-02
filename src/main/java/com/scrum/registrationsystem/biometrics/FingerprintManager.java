@@ -6,6 +6,7 @@ package com.scrum.registrationsystem.biometrics;
 
 import com.scrum.registrationsystem.dao.UserDao;
 import com.scrum.registrationsystem.entities.User;
+import com.scrum.registrationsystem.service.FinesCalculator;
 import com.zkteco.biometric.FingerprintSensorErrorCode;
 import com.zkteco.biometric.FingerprintSensorEx;
 
@@ -46,6 +47,7 @@ public class FingerprintManager {
     private FingerprintCallback callback = null;
     UserDao userDao = new UserDao();
     ArrayList<User> users = new ArrayList<>();
+    private final FinesCalculator finesCalculator = new FinesCalculator();
 
     public FingerprintManager() {
         callback = MyFingerprintCallback.getInstance(null);
@@ -255,6 +257,7 @@ public class FingerprintManager {
             int ret = 0;
             while (!mbStop) {
                 templateLen[0] = 2048;
+                finesCalculator.calculateAndStoreFines();
                 if (0 == (ret = FingerprintSensorEx.AcquireFingerprint(mhDevice, imgbuf, template, templateLen))) {
                     if (nFakeFunOn == 1) {
                         byte[] paramValue = new byte[4];
@@ -272,8 +275,6 @@ public class FingerprintManager {
                     }
                     OnCatpureOK(imgbuf);
                     OnExtractOK(template, templateLen[0]);
-                    String strBase64 = FingerprintSensorEx.BlobToBase64(template, templateLen[0]);
-                    System.out.println("strBase64=" + strBase64);
                 }
                 try {
                     Thread.sleep(500);
