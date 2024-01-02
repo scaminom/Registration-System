@@ -2,6 +2,8 @@ package com.scrum.registrationsystem.dao;
 
 import com.scrum.registrationsystem.entities.Fines;
 import com.scrum.registrationsystem.util.HibernateUtil;
+
+import java.time.LocalDate;
 import java.util.List;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
@@ -69,7 +71,7 @@ public class FinesDAO {
         }
     }
 
-    public Fines findTodayLastMultaByUser(Long id) throws HibernateException {
+    public Fines getTodayLastMultaByUser(Long id) throws HibernateException {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             return session.createQuery("from Fines where user_id = :id order by id desc", Fines.class)
                     .setParameter("id", id)
@@ -79,4 +81,18 @@ public class FinesDAO {
             throw e;
         }
     }
+
+    public Fines findTodayLastMultaByUser(Long id) throws HibernateException {
+    LocalDate today = LocalDate.now(); 
+    try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+        return session.createQuery("from Fines where user_id = :id AND date = :today order by id desc", Fines.class)
+                .setParameter("id", id)
+                .setParameter("today", today)
+                .setMaxResults(1)
+                .uniqueResult();
+    } catch (HibernateException e) {
+        throw e;
+    }
+}
+
 }

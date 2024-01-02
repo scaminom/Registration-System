@@ -2,6 +2,8 @@ package com.scrum.registrationsystem.entities;
 
 import java.sql.Date;
 
+import com.scrum.registrationsystem.service.TimeService;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -35,10 +37,11 @@ public class Fines {
 	public Fines() {
 	}
 
-	public Fines(User user, String description, double constFine) {
+	public Fines(User user, String description, double constFine, Date date) {
 		this.user = user;
 		this.description = description;
 		this.costFine = constFine;
+		this.date = date;
 	}
 
 	public Long getId() {

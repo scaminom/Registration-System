@@ -28,7 +28,7 @@ public class FinesCalculator {
 	}
 
 	public double calcularMulta(Long userId, LocalDateTime hora, boolean esEntrada) {
-		Register ultimoRegistro = registerDao.getLastRegisterForUser(userId);
+		Register ultimoRegistro = null;
 		if (esEntrada && hora.getHour() >= HORA_INICIO_JORNADA_VESPERTINA) {
 			if (ultimoRegistro == null || ultimoRegistro.getEntryTime().getHour() >= HORA_INICIO_JORNADA_VESPERTINA) {
 				return 300 * MULTA_POR_MINUTO;

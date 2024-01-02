@@ -101,39 +101,38 @@ public class RegisterDao {
         }
     }
 
-    public Register getLastRegisterForUser(Long userId) throws HibernateException {
+    public Register findLastRecordByUser(Long userId) throws HibernateException {
         if (userId == null) {
             throw new IllegalArgumentException("User ID must not be null.");
         }
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            LocalDate today = LocalDate.now(); // Obtén la fecha de hoy
+
+            // Modifica la consulta para filtrar registros por la fecha de hoy
             Query<Register> query = session.createQuery(
-                    "FROM Register WHERE user.id = :userId ORDER BY id DESC", Register.class);
+                    "FROM Register WHERE user.id = :userId AND date(entryTime) = :today ORDER BY id DESC",
+                    Register.class);
             query.setParameter("userId", userId);
+            query.setParameter("today", today);
             query.setMaxResults(1);
+
             return query.uniqueResult();
         } catch (HibernateException e) {
             throw e;
         }
-
     }
 
-    public Register findLastRecordByUser(Long userId) throws HibernateException {
-    if (userId == null) {
-        throw new IllegalArgumentException("User ID must not be null.");
+    public List<Register> findAllRegistersByDate(LocalDate date) throws HibernateException {
+        if (date == null) {
+            throw new IllegalArgumentException("Date must not be null.");
+        }
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            return session.createQuery("from Register where date(entryTime) = :date", Register.class)
+                    .setParameter("date", date)
+                    .list();
+        } catch (HibernateException e) {
+            throw e;
+        }
     }
-    try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-        LocalDate today = LocalDate.now(); // Obtén la fecha de hoy
 
-        // Modifica la consulta para filtrar registros por la fecha de hoy
-        Query<Register> query = session.createQuery(
-                "FROM Register WHERE user.id = :userId AND date(entryTime) = :today ORDER BY id DESC", Register.class);
-        query.setParameter("userId", userId);
-        query.setParameter("today", today);
-        query.setMaxResults(1);
-        
-        return query.uniqueResult();
-    } catch (HibernateException e) {
-        throw e;
-    }
-}
 }
